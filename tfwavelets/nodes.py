@@ -20,6 +20,8 @@ def dwt1d(input_node, filter_coeffs, levels=1):
 
     for level in range(levels):
         # TODO: Convert stride kwarg to tuple
+        # TODO: Actual convolution, not correlation
+        # TODO: Periodic extention, not zero-padding
         lp_res = tf.nn.conv1d(last_level, tf_lp, stride=2, padding="SAME")
         hp_res = tf.nn.conv1d(last_level, tf_hp, stride=2, padding="SAME")
 
