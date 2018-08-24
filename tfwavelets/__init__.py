@@ -1,2 +1,3 @@
-import nodes
-import wrappers
+import tfwavelets.nodes
+import tfwavelets.wrappers
+import tfwavelets.dwtcoeffs
