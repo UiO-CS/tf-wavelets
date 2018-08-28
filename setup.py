@@ -9,6 +9,6 @@ setup(
     license="MIT",
     description="TensorFlow implementation of descrete wavelets",
     url="https://github.com/UiO-CS/tf-wavelets",
-    install_requires=["tensorflow"],
+    install_requires=["tensorflow", "numpy"],
     packages=["tfwavelets"],
     zip_safe=False)
