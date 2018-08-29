@@ -44,6 +44,21 @@ db4 = (np.array([-0.010597401784997278,
                  -0.010597401784997278], dtype=np.float32))
 
 
+db1_lp_matrices = (
+    np.array([[]], dtype=np.float32),
+    np.array([[]], dtype=np.float32),
+    np.array([[1/np.sqrt(2)]], dtype=np.float32),
+    np.array([[1/np.sqrt(2)]], dtype=np.float32)
+)
+
+db1_hp_matrices = (
+    np.array([[-1/np.sqrt(2)]], dtype=np.float32),
+    np.array([[1/np.sqrt(2)]], dtype=np.float32),
+    np.array([[]], dtype=np.float32),
+    np.array([[]], dtype=np.float32)
+)
+
+
 def edge_matrices(coeffs, zero):
     """Computes the submatrices needed at the ends for circular convolution.
 
