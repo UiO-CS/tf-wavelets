@@ -58,19 +58,22 @@ def edge_matrices(coeffs, zero):
     if not isinstance(coeffs, np.ndarray):
         coeffs = np.array(coeffs)
 
+    n, = coeffs.shape
     coeffs = coeffs[::-1]
 
-
-    n, = coeffs.shape
+    # Some padding is necesssary to keep the submatrices
+    # from having having columns in common
     padding = max((zero, n-zero-1))
     matrix_size = n+padding
     filter_matrix = np.zeros((matrix_size, matrix_size), dtype=np.float32)
     negative = coeffs[-(zero+1):] # negative indexed filter coeffs (and 0)
     positive = coeffs[:-(zero+1)] # filter coeffs with strictly positive indeces
 
+    # Insert first row
     filter_matrix[0, :len(negative)] = negative
     filter_matrix[0, -len(positive):] = positive
 
+    # Cycle previous row to compute the entire filter matrix
     for i in range(1, matrix_size):
         filter_matrix[i,:] = np.roll(filter_matrix[i-1,:], 1)
 
