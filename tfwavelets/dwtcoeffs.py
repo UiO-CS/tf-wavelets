@@ -86,12 +86,15 @@ def edge_matrices(coeffs, zero):
 
     # Insert first row
     filter_matrix[0, :len(negative)] = negative
-    filter_matrix[0, -len(positive):] = positive
+
+    # Because -0 == 0, a length of 0 makes it impossible to broadcast
+    # (nor is is necessary)
+    if len(positive) > 0:
+        filter_matrix[0, -len(positive):] = positive
 
     # Cycle previous row to compute the entire filter matrix
     for i in range(1, matrix_size):
         filter_matrix[i,:] = np.roll(filter_matrix[i-1,:], 1)
-
 
     # TODO: Indexing not thoroughly tested
     num_pos = len(positive)
@@ -100,5 +103,10 @@ def edge_matrices(coeffs, zero):
     top_right = filter_matrix[:num_pos, -num_pos:]
     bottom_left = filter_matrix[-num_neg+1:, :num_neg-1]
     bottom_right = filter_matrix[-num_neg+1:, -(num_pos+num_neg-1):]
+
+    # Indexing wrong when there are no negative indexed coefficients
+    if num_neg == 1:
+        bottom_left = np.array([[]], dtype=np.float32)
+        bottom_right = np.array([[]], dtype=np.float32)
 
     return(top_left, top_right, bottom_left, bottom_right)
