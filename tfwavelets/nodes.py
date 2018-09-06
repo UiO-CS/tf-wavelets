@@ -1,10 +1,22 @@
 import tensorflow as tf
 import numpy as np
+from tfwavelets.dwtcoeffs import edge_matrices
 
 
 def _adapt_filter(filter):
     # Add empty dimensions for batch size and channel num
     return np.expand_dims(np.expand_dims(filter, -1), -1)
+
+
+def _to_tf_mat(matrices):
+    result = []
+
+    for matrix in matrices:
+        result.append(
+            tf.constant(np.expand_dims(matrix, 0), dtype=tf.float32)
+        )
+
+    return result
 
 
 def cyclic_conv1d(input_node, kernel_node, tl_node, tr_node, bl_node, br_node):
@@ -65,7 +77,11 @@ def dwt1d(input_node, filter_coeffs, levels=1):
     last_level = input_node
 
     lp_adapted = _adapt_filter(filter_coeffs[0])
+    lp_mat = _to_tf_mat(edge_matrices(filter_coeffs[0], 0))
+
+
     hp_adapted = _adapt_filter(filter_coeffs[1])
+    hp_mat = _to_tf_mat(edge_matrices(filter_coeffs[1], 1))
 
     tf_lp = tf.constant(lp_adapted, dtype=tf.float32, shape=[len(filter_coeffs[0]), 1, 1])
     tf_hp = tf.constant(hp_adapted, dtype=tf.float32, shape=[len(filter_coeffs[1]), 1, 1])
@@ -74,8 +90,11 @@ def dwt1d(input_node, filter_coeffs, levels=1):
         # TODO: Convert stride kwarg to tuple
         # TODO: Actual convolution, not correlation
         # TODO: Periodic extention, not zero-padding
-        lp_res = tf.nn.conv1d(last_level, tf_lp, stride=2, padding="SAME")
-        hp_res = tf.nn.conv1d(last_level, tf_hp, stride=2, padding="SAME")
+        # lp_res = tf.nn.conv1d(last_level, tf_lp, stride=2, padding="SAME")
+        # hp_res = tf.nn.conv1d(last_level, tf_hp, stride=2, padding="SAME")
+
+        lp_res = cyclic_conv1d(last_level, tf_lp, *lp_mat)[:,::2,:]
+        hp_res = cyclic_conv1d(last_level, tf_hp, *hp_mat)[:,::2,:]
 
         last_level = lp_res
         coeffs[levels - level] = hp_res
