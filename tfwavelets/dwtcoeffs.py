@@ -1,4 +1,6 @@
 import numpy as np
+import tensorflow as tf
+from tfwavelets.utils import adapt_filter, to_tf_mat
 
 
 class Filter:
@@ -6,9 +8,11 @@ class Filter:
     Class representing a filter.
 
     Attributes:
-        coeffs (np.ndarray):       Filter coefficients
+        coeffs (tf.constant):      Filter coefficients
         zero (int):                Origin of filter (which index of coeffs array is
                                    actually indexed as 0).
+        edge_matrices (iterable):  List of edge matrices, used for circular convolution.
+                                   Stored as 3D TF tensors (constants).
     """
 
 
@@ -21,8 +25,11 @@ class Filter:
             zero (int):                Origin of filter (which index of coeffs array is
                                        actually indexed as 0).
         """
-        self.coeffs = coeffs
+        self.coeffs = tf.constant(adapt_filter(coeffs), dtype=tf.float32)
+        self._coeffs = coeffs.astype(np.float32)
         self.zero = zero
+
+        self.edge_matrices = to_tf_mat(self._edge_matrices())
 
 
     def __getitem__(self, item):
@@ -37,33 +44,33 @@ class Filter:
             np.ndarray: Item(s) at specified place(s)
         """
         if isinstance(item, slice):
-            return self.coeffs.__getitem__(
+            return self._coeffs.__getitem__(
                 slice(item.start + self.zero, item.stop + self.zero, item.step)
             )
         else:
-            return self.coeffs.__getitem__(item + self.zero)
+            return self._coeffs.__getitem__(item + self.zero)
 
 
-    def edge_matrices(self):
+    def _edge_matrices(self):
         """Computes the submatrices needed at the ends for circular convolution.
 
         Returns:
             Tuple of 2d-arrays, (top-left, top-right, bottom-left, bottom-right).
         """
-        if not isinstance(self.coeffs, np.ndarray):
-            self.coeffs = np.array(self.coeffs)
+        if not isinstance(self._coeffs, np.ndarray):
+            self._coeffs = np.array(self._coeffs)
 
-        n, = self.coeffs.shape
-        self.coeffs = self.coeffs[::-1]
+        n, = self._coeffs.shape
+        self._coeffs = self._coeffs[::-1]
 
         # Some padding is necesssary to keep the submatrices
         # from having having columns in common
         padding = max((self.zero, n - self.zero - 1))
         matrix_size = n + padding
         filter_matrix = np.zeros((matrix_size, matrix_size), dtype=np.float32)
-        negative = self.coeffs[
+        negative = self._coeffs[
                    -(self.zero + 1):]  # negative indexed filter coeffs (and 0)
-        positive = self.coeffs[
+        positive = self._coeffs[
                    :-(self.zero + 1)]  # filter coeffs with strictly positive indeces
 
         # Insert first row
@@ -105,6 +112,7 @@ class Wavelet:
         recon_hp (Filter):     Filter coefficients for reconstruction high pass filter
     """
 
+
     def __init__(self, decomp_lp, decomp_hp, recon_lp, recon_hp):
         """
         Create a new wavelet based on specified filters
@@ -115,66 +123,70 @@ class Wavelet:
             recon_lp (Filter):     Filter coefficients for reconstruction low pass filter
             recon_hp (Filter):     Filter coefficients for reconstruction high pass filter
         """
-        self.decomp_lp = decomp_lp.astype(np.float32)
-        self.decomp_hp = decomp_hp.astype(np.float32)
-        self.recon_lp = recon_lp.astype(np.float32)
-        self.recon_hp = recon_hp.astype(np.float32)
+        self.decomp_lp = decomp_lp
+        self.decomp_hp = decomp_hp
+        self.recon_lp = recon_lp
+        self.recon_hp = recon_hp
 
 
 # Haar wavelet
-haar = (np.array([0.70710677, 0.70710677], dtype=np.float32),
-        np.array([0.70710677, -0.70710677], dtype=np.float32))
+haar = Wavelet(
+    Filter(np.array([0.70710677, 0.70710677]), 0),
+    Filter(np.array([0.70710677, -0.70710677]), 1),
+    Filter(np.array([0.70710677, 0.70710677]), 0),
+    Filter(np.array([-0.70710677, 0.70710677]), 1),
+)
 
 # Daubechies wavelets
+# TODO: Convert to Wavelet/Filter class
 db1 = haar
 db2 = (np.array([-0.12940952255092145,
-                  0.22414386804185735,
-                  0.836516303737469,
-                  0.48296291314469025], dtype=np.float32),
+                 0.22414386804185735,
+                 0.836516303737469,
+                 0.48296291314469025], dtype=np.float32),
        np.array([-0.48296291314469025,
-                  0.836516303737469,
+                 0.836516303737469,
                  -0.22414386804185735,
                  -0.12940952255092145], dtype=np.float32))
-db3 = (np.array([ 0.035226291882100656,
+db3 = (np.array([0.035226291882100656,
                  -0.08544127388224149,
                  -0.13501102001039084,
-                  0.4598775021193313,
-                  0.8068915093133388,
-                  0.3326705529509569], dtype=np.float32),
+                 0.4598775021193313,
+                 0.8068915093133388,
+                 0.3326705529509569], dtype=np.float32),
        np.array([-0.3326705529509569,
-                  0.8068915093133388,
+                 0.8068915093133388,
                  -0.4598775021193313,
                  -0.13501102001039084,
-                  0.08544127388224149,
-                  0.035226291882100656], dtype=np.float32))
+                 0.08544127388224149,
+                 0.035226291882100656], dtype=np.float32))
 db4 = (np.array([-0.010597401784997278,
-                  0.032883011666982945,
-                  0.030841381835986965,
+                 0.032883011666982945,
+                 0.030841381835986965,
                  -0.18703481171888114,
                  -0.02798376941698385,
-                  0.6308807679295904,
-                  0.7148465705525415,
-                  0.23037781330885523], dtype=np.float32),
+                 0.6308807679295904,
+                 0.7148465705525415,
+                 0.23037781330885523], dtype=np.float32),
        np.array([-0.23037781330885523,
-                  0.7148465705525415,
+                 0.7148465705525415,
                  -0.6308807679295904,
                  -0.02798376941698385,
-                  0.18703481171888114,
-                  0.030841381835986965,
+                 0.18703481171888114,
+                 0.030841381835986965,
                  -0.032883011666982945,
                  -0.010597401784997278], dtype=np.float32))
-
 
 db1_lp_matrices = (
     np.array([[]], dtype=np.float32),
     np.array([[]], dtype=np.float32),
-    np.array([[1/np.sqrt(2)]], dtype=np.float32),
-    np.array([[1/np.sqrt(2)]], dtype=np.float32)
+    np.array([[1 / np.sqrt(2)]], dtype=np.float32),
+    np.array([[1 / np.sqrt(2)]], dtype=np.float32)
 )
 
 db1_hp_matrices = (
-    np.array([[-1/np.sqrt(2)]], dtype=np.float32),
-    np.array([[1/np.sqrt(2)]], dtype=np.float32),
+    np.array([[-1 / np.sqrt(2)]], dtype=np.float32),
+    np.array([[1 / np.sqrt(2)]], dtype=np.float32),
     np.array([[]], dtype=np.float32),
     np.array([[]], dtype=np.float32)
 )
