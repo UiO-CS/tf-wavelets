@@ -1,5 +1,126 @@
 import numpy as np
 
+
+class Filter:
+    """
+    Class representing a filter.
+
+    Attributes:
+        coeffs (np.ndarray):       Filter coefficients
+        zero (int):                Origin of filter (which index of coeffs array is
+                                   actually indexed as 0).
+    """
+
+
+    def __init__(self, coeffs, zero):
+        """
+        Create a filter based on given filter coefficients
+
+        Args:
+            coeffs (np.ndarray):       Filter coefficients
+            zero (int):                Origin of filter (which index of coeffs array is
+                                       actually indexed as 0).
+        """
+        self.coeffs = coeffs
+        self.zero = zero
+
+
+    def __getitem__(self, item):
+        """
+        Returns filter coefficients at requested indeces. Indeces are offset by the filter
+        origin
+
+        Args:
+            item (int or slice):    Item(s) to get
+
+        Returns:
+            np.ndarray: Item(s) at specified place(s)
+        """
+        if isinstance(item, slice):
+            return self.coeffs.__getitem__(
+                slice(item.start + self.zero, item.stop + self.zero, item.step)
+            )
+        else:
+            return self.coeffs.__getitem__(item + self.zero)
+
+
+    def edge_matrices(self):
+        """Computes the submatrices needed at the ends for circular convolution.
+
+        Returns:
+            Tuple of 2d-arrays, (top-left, top-right, bottom-left, bottom-right).
+        """
+        if not isinstance(self.coeffs, np.ndarray):
+            self.coeffs = np.array(self.coeffs)
+
+        n, = self.coeffs.shape
+        self.coeffs = self.coeffs[::-1]
+
+        # Some padding is necesssary to keep the submatrices
+        # from having having columns in common
+        padding = max((self.zero, n - self.zero - 1))
+        matrix_size = n + padding
+        filter_matrix = np.zeros((matrix_size, matrix_size), dtype=np.float32)
+        negative = self.coeffs[
+                   -(self.zero + 1):]  # negative indexed filter coeffs (and 0)
+        positive = self.coeffs[
+                   :-(self.zero + 1)]  # filter coeffs with strictly positive indeces
+
+        # Insert first row
+        filter_matrix[0, :len(negative)] = negative
+
+        # Because -0 == 0, a length of 0 makes it impossible to broadcast
+        # (nor is is necessary)
+        if len(positive) > 0:
+            filter_matrix[0, -len(positive):] = positive
+
+        # Cycle previous row to compute the entire filter matrix
+        for i in range(1, matrix_size):
+            filter_matrix[i, :] = np.roll(filter_matrix[i - 1, :], 1)
+
+        # TODO: Indexing not thoroughly tested
+        num_pos = len(positive)
+        num_neg = len(negative)
+        top_left = filter_matrix[:num_pos, :(num_pos + num_neg - 1)]
+        top_right = filter_matrix[:num_pos, -num_pos:]
+        bottom_left = filter_matrix[-num_neg + 1:, :num_neg - 1]
+        bottom_right = filter_matrix[-num_neg + 1:, -(num_pos + num_neg - 1):]
+
+        # Indexing wrong when there are no negative indexed coefficients
+        if num_neg == 1:
+            bottom_left = np.array([[]], dtype=np.float32)
+            bottom_right = np.array([[]], dtype=np.float32)
+
+        return top_left, top_right, bottom_left, bottom_right
+
+
+class Wavelet:
+    """
+    Class representing a wavelet.
+
+    Attributes:
+        decomp_lp (Filter):    Filter coefficients for decomposition low pass filter
+        decomp_hp (Filter):    Filter coefficients for decomposition high pass filter
+        recon_lp (Filter):     Filter coefficients for reconstruction low pass filter
+        recon_hp (Filter):     Filter coefficients for reconstruction high pass filter
+    """
+
+    def __init__(self, decomp_lp, decomp_hp, recon_lp, recon_hp):
+        """
+        Create a new wavelet based on specified filters
+
+        Args:
+            decomp_lp (Filter):    Filter coefficients for decomposition low pass filter
+            decomp_hp (Filter):    Filter coefficients for decomposition high pass filter
+            recon_lp (Filter):     Filter coefficients for reconstruction low pass filter
+            recon_hp (Filter):     Filter coefficients for reconstruction high pass filter
+        """
+        self.decomp_lp = decomp_lp.astype(np.float32)
+        self.decomp_hp = decomp_hp.astype(np.float32)
+        self.recon_lp = recon_lp.astype(np.float32)
+        self.recon_hp = recon_hp.astype(np.float32)
+
+
 # Haar wavelet
 haar = (np.array([0.70710677, 0.70710677], dtype=np.float32),
         np.array([0.70710677, -0.70710677], dtype=np.float32))
@@ -57,56 +178,3 @@ db1_hp_matrices = (
     np.array([[]], dtype=np.float32),
     np.array([[]], dtype=np.float32)
 )
-
-
-def edge_matrices(coeffs, zero):
-    """Computes the submatrices needed at the ends for circular convolution.
-
-    Args:
-        coeffs: 1d numpy array with the filter coefficients, ordered by
-                filter index.
-        zero:   Index in `coeffs` where the zero-indexed filter coefficient is.
-
-    Returns:
-        Tuple of 2d-arrays, (top-left, top-right, bottom-left, bottom-right).
-    """
-    if not isinstance(coeffs, np.ndarray):
-        coeffs = np.array(coeffs)
-
-    n, = coeffs.shape
-    coeffs = coeffs[::-1]
-
-    # Some padding is necesssary to keep the submatrices
-    # from having having columns in common
-    padding = max((zero, n-zero-1))
-    matrix_size = n+padding
-    filter_matrix = np.zeros((matrix_size, matrix_size), dtype=np.float32)
-    negative = coeffs[-(zero+1):] # negative indexed filter coeffs (and 0)
-    positive = coeffs[:-(zero+1)] # filter coeffs with strictly positive indeces
-
-    # Insert first row
-    filter_matrix[0, :len(negative)] = negative
-
-    # Because -0 == 0, a length of 0 makes it impossible to broadcast
-    # (nor is is necessary)
-    if len(positive) > 0:
-        filter_matrix[0, -len(positive):] = positive
-
-    # Cycle previous row to compute the entire filter matrix
-    for i in range(1, matrix_size):
-        filter_matrix[i,:] = np.roll(filter_matrix[i-1,:], 1)
-
-    # TODO: Indexing not thoroughly tested
-    num_pos = len(positive)
-    num_neg = len(negative)
-    top_left = filter_matrix[:num_pos, :(num_pos+num_neg-1)]
-    top_right = filter_matrix[:num_pos, -num_pos:]
-    bottom_left = filter_matrix[-num_neg+1:, :num_neg-1]
-    bottom_right = filter_matrix[-num_neg+1:, -(num_pos+num_neg-1):]
-
-    # Indexing wrong when there are no negative indexed coefficients
-    if num_neg == 1:
-        bottom_left = np.array([[]], dtype=np.float32)
-        bottom_right = np.array([[]], dtype=np.float32)
-
-    return(top_left, top_right, bottom_left, bottom_right)
