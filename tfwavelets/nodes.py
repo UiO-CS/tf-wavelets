@@ -35,13 +35,14 @@ def cyclic_conv1d(input_node, kernel_node, tl_node, tr_node, bl_node, br_node):
                         [-1, tl_shape[2], -1])
     tr_slice = tf.slice(input_node,
                         [0, input_shape[1]-tr_shape[2], 0],
-                        [-1, tr_shape[1], -1])
+                        [-1, tr_shape[2], -1]) 
     bl_slice = tf.slice(input_node,
                         [0, 0, 0],
                         [-1, bl_shape[2], -1])
     br_slice = tf.slice(input_node,
                         [0, input_shape[1]-br_shape[2], 0],
                         [-1, br_shape[2], -1])
+
 
     # TODO: It just werks (It's the magic of the algorithm). i.e. Why do we have to transpose?
     tl = tl_node @ tf.transpose(tl_slice, perm=[2,1,0])
