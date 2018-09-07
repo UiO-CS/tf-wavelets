@@ -1,3 +1,8 @@
+"""
+The 'nodes' module contains methods to construct TF subgraphs computing the 1D or 2D DWT
+or IDWT. Intended to be used if you need a DWT in your own TF graph.
+"""
+
 import tensorflow as tf
 
 
@@ -129,7 +134,8 @@ def dwt2d(input_node, wavelet, levels=1):
                 wavelet,
                 1
             ),
-            perm=[1, 0, 2])
+            perm=[1, 0, 2]
+        )
 
         last_level = tf.slice(second_pass, [0, 0, 0], [local_m // 2, local_n // 2, 1])
         coeffs[level] = [
@@ -145,8 +151,3 @@ def dwt2d(input_node, wavelet, levels=1):
         last_level = tf.concat([upper_half, lower_half], 1)
 
     return last_level
-
-
-def idwt1d(input_node, wavelet, level=1)
-
-

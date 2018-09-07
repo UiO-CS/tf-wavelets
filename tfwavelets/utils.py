@@ -1,3 +1,8 @@
+"""
+The 'utils' module contains some useful helper functions, mostly used during the
+implementation of the other modules.
+"""
+
 import numpy as np
 import tensorflow as tf
 

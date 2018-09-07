@@ -1,3 +1,22 @@
+"""
+The 'dwtcoeffs' module contains predefined wavelets, as well as the classes necessary to
+create more user-defined wavelets.
+
+Wavelets are defined by the Wavelet class. A Wavelet object mainly consists of four Filter
+objects (defined by the Filter class) representing the decomposition and reconstruction
+low pass and high pass filters.
+
+Examples:
+    You can define your own wavelet by creating four filters, and combining them to a wavelet:
+
+    >>> decomp_lp = Filter([1 / np.sqrt(2), 1 / np.sqrt(2)], 0)
+    >>> decomp_hp = Filter([1 / np.sqrt(2), -1 / np.sqrt(2)], 1)
+    >>> recon_lp = Filter([1 / np.sqrt(2), 1 / np.sqrt(2)], 0)
+    >>> recon_hp = Filter([-1 / np.sqrt(2), 1 / np.sqrt(2)], 1)
+    >>> haar = Wavelet(decomp_lp, decomp_hp, recon_lp, recon_hp)
+
+"""
+
 import numpy as np
 import tensorflow as tf
 from tfwavelets.utils import adapt_filter, to_tf_mat
@@ -26,7 +45,11 @@ class Filter:
                                        actually indexed as 0).
         """
         self.coeffs = tf.constant(adapt_filter(coeffs), dtype=tf.float32)
+
+        if not isinstance(coeffs, np.ndarray):
+            coeffs = np.array(self.coeffs)
         self._coeffs = coeffs.astype(np.float32)
+
         self.zero = zero
 
         self.edge_matrices = to_tf_mat(self._edge_matrices())
