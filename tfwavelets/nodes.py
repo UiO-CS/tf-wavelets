@@ -1,20 +1,25 @@
+"""
+The 'nodes' module contains methods to construct TF subgraphs computing the 1D or 2D DWT
+or IDWT. Intended to be used if you need a DWT in your own TF graph.
+"""
+
 import tensorflow as tf
 
 
-def cyclic_conv1d(input_node, filter):
+def cyclic_conv1d(input_node, filter_):
     """
     Cyclic convolution
 
     Args:
         input_node:  Input signal (3-tensor [batch, width, in_channels])
-        filter:      Filter
+        filter_:     Filter
 
     Returns:
         Tensor with the result of a periodic convolution
     """
     # Create shorthands for TF nodes
-    kernel_node = filter.coeffs
-    tl_node, tr_node, bl_node, br_node = filter.edge_matrices
+    kernel_node = filter_.coeffs
+    tl_node, tr_node, bl_node, br_node = filter_.edge_matrices
 
     # Do inner convolution
     inner = tf.nn.conv1d(input_node, kernel_node[::-1], stride=1, padding='VALID')
@@ -101,22 +106,7 @@ def dwt1d(input_node, wavelet, levels=1):
 
     last_level = input_node
 
-    # lp_adapted = adapt_filter(filter_coeffs[0])
-    # lp_mat = to_tf_mat(edge_matrices(filter_coeffs[0], 0))
-    #
-    # hp_adapted = adapt_filter(filter_coeffs[1])
-    # hp_mat = to_tf_mat(edge_matrices(filter_coeffs[1], 1))
-    #
-    # tf_lp = tf.constant(lp_adapted, dtype=tf.float32, shape=[len(filter_coeffs[0]), 1, 1])
-    # tf_hp = tf.constant(hp_adapted, dtype=tf.float32, shape=[len(filter_coeffs[1]), 1, 1])
-
     for level in range(levels):
-        # TODO: Convert stride kwarg to tuple
-        # TODO: Actual convolution, not correlation
-        # TODO: Periodic extention, not zero-padding
-        # lp_res = tf.nn.conv1d(last_level, tf_lp, stride=2, padding="SAME")
-        # hp_res = tf.nn.conv1d(last_level, tf_hp, stride=2, padding="SAME")
-
         lp_res = cyclic_conv1d(last_level, wavelet.decomp_lp)[:, ::2, :]
         hp_res = cyclic_conv1d(last_level, wavelet.decomp_hp)[:, ::2, :]
 
@@ -158,7 +148,8 @@ def dwt2d(input_node, wavelet, levels=1):
                 wavelet,
                 1
             ),
-            perm=[1, 0, 2])
+            perm=[1, 0, 2]
+        )
 
         last_level = tf.slice(second_pass, [0, 0, 0], [local_m // 2, local_n // 2, 1])
         coeffs[level] = [
@@ -174,3 +165,4 @@ def dwt2d(input_node, wavelet, levels=1):
         last_level = tf.concat([upper_half, lower_half], 1)
 
     return last_level
+

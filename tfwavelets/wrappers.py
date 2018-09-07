@@ -1,3 +1,9 @@
+"""
+The 'wrappers' module contains methods that wraps around the functionality in nodes. The
+construct a full TF graph, launches a session, and evaluates the graph. Intended to be
+used when you just want to compute the DWT/IDWT of a signal.
+"""
+
 import numpy as np
 import tfwavelets as tfw
 import tensorflow as tf
