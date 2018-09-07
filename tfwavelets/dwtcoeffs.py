@@ -118,8 +118,8 @@ class Filter:
 
         # Indexing wrong when there are no negative indexed coefficients
         if num_neg == 1:
-            bottom_left = np.array([[]], dtype=np.float32)
-            bottom_right = np.array([[]], dtype=np.float32)
+            bottom_left = np.zeros((0,0), dtype=np.float32)
+            bottom_right = np.zeros((0,0), dtype=np.float32)
 
         return top_left, top_right, bottom_left, bottom_right
 
