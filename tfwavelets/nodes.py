@@ -1,20 +1,20 @@
 import tensorflow as tf
 
 
-def cyclic_conv1d(input_node, filter):
+def cyclic_conv1d(input_node, filter_):
     """
     Cyclic convolution
 
     Args:
         input_node:  Input signal (3-tensor [batch, width, in_channels])
-        filter:      Filter
+        filter_:     Filter
 
     Returns:
         Tensor with the result of a periodic convolution
     """
     # Create shorthands for TF nodes
-    kernel_node = filter.coeffs
-    tl_node, tr_node, bl_node, br_node = filter.edge_matrices
+    kernel_node = filter_.coeffs
+    tl_node, tr_node, bl_node, br_node = filter_.edge_matrices
 
     # Do inner convolution
     inner = tf.nn.conv1d(input_node, kernel_node[::-1], stride=1, padding='VALID')
@@ -145,3 +145,8 @@ def dwt2d(input_node, wavelet, levels=1):
         last_level = tf.concat([upper_half, lower_half], 1)
 
     return last_level
+
+
+def idwt1d(input_node, wavelet, level=1)
+
+
