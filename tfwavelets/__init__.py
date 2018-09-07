@@ -13,9 +13,8 @@ The package consists of the following modules:
     * 'utils' contains some useful helper functions, mostly used during the implementation
       of the other modules.
 """
-
-import tfwavelets.nodes
-import tfwavelets.wrappers
-import tfwavelets.dwtcoeffs
-import tfwavelets.utils
+from . import nodes
+from . import wrappers
+from . import dwtcoeffs
+from . import utils
 
