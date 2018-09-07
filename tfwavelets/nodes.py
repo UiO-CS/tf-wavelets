@@ -57,6 +57,35 @@ def cyclic_conv1d(input_node, filter_):
     return tf.concat((head, inner, tail), axis=1)
 
 
+def upsample(input_node, odd=False):
+    """Upsamples. Doubles the length of the input, filling with zeros
+
+    Args:
+        input_node: 3-tensor [batch, spatial dim, channels] to be upsampled
+        odd:        Bool, optional. If True, content of input_node will be
+                    placed on the odd indeces of the output. Otherwise, the
+                    content will be places on the even indeces. This is the
+                    default behaviour.
+
+    Returns:
+        The upsampled output Tensor.
+    """
+
+    columns = []
+    for col in tf.unstack(input_node, axis=1):
+        columns.extend([col, tf.zeros_like(col)])
+
+    if odd:
+        # https://stackoverflow.com/questions/30097512/how-to-perform-a-pairwise-swap-of-a-list
+        # TODO: Understand
+        # Rounds down to even number
+        l = len(columns)&-2
+        columns[1:l:2], columns[:l:2] = columns[:l:2], columns[1:l:2]
+
+    # TODO: Should we actually expand the dimension?
+    return tf.expand_dims(tf.concat(columns, 1), -1)
+
+
 def dwt1d(input_node, wavelet, levels=1):
     """
     Constructs a TF computational graph computing the 1D DWT of an input signal.
