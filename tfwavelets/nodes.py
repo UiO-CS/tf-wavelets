@@ -79,7 +79,7 @@ def upsample(input_node, odd=False):
         # https://stackoverflow.com/questions/30097512/how-to-perform-a-pairwise-swap-of-a-list
         # TODO: Understand
         # Rounds down to even number
-        l = len(columns)&-2
+        l = len(columns) & -2
         columns[1:l:2], columns[:l:2] = columns[:l:2], columns[1:l:2]
 
     # TODO: Should we actually expand the dimension?
@@ -108,7 +108,7 @@ def dwt1d(input_node, wavelet, levels=1):
 
     for level in range(levels):
         lp_res = cyclic_conv1d(last_level, wavelet.decomp_lp)[:, ::2, :]
-        hp_res = cyclic_conv1d(last_level, wavelet.decomp_hp)[:, ::2, :]
+        hp_res = cyclic_conv1d(last_level, wavelet.decomp_hp)[:, 1::2, :]
 
         last_level = lp_res
         coeffs[levels - level] = hp_res
@@ -155,7 +155,8 @@ def dwt2d(input_node, wavelet, levels=1):
         coeffs[level] = [
             tf.slice(second_pass, [0, local_n // 2, 0], [local_m // 2, local_n // 2, 1]),
             tf.slice(second_pass, [local_m // 2, 0, 0], [local_m // 2, local_n // 2, 1]),
-            tf.slice(second_pass, [local_m // 2, local_n // 2, 0], [local_m // 2, local_n // 2, 1])
+            tf.slice(second_pass, [local_m // 2, local_n // 2, 0],
+                     [local_m // 2, local_n // 2, 1])
         ]
 
     for level in range(levels - 1, -1, -1):
@@ -166,3 +167,61 @@ def dwt2d(input_node, wavelet, levels=1):
 
     return last_level
 
+
+def idwt1d(input_node, wavelet, levels=1):
+    """
+    Constructs a TF graph that computes the 1D inverse DWT for a given wavelet.
+
+    Args:
+        input_node (tf.placeholder):             Input signal. A 3D tensor with dimensions
+                                                 as [batch, signal, channels]
+        wavelet (tfwavelets.dwtcoeffs.Wavelet):  Wavelet object.
+        levels (int):                            Number of levels.
+
+    Returns:
+        Output node of IDWT graph.
+    """
+    m, n = int(input_node.shape[0]), int(input_node.shape[1])
+
+    lowres = tf.slice(input_node, [0, 0, 0], [m, n // 2, 1])
+    detail = tf.slice(input_node, [0, n // 2, 0], [m, n // 2, 1])
+
+    lowres_padded = upsample(lowres, odd=False)
+    detail_padded = upsample(detail, odd=True)
+
+    lowres_filtered = cyclic_conv1d(lowres_padded, wavelet.recon_lp)
+    detail_filtered = cyclic_conv1d(detail_padded, wavelet.recon_hp)
+
+    last_level = lowres_filtered + detail_filtered
+
+    return last_level
+
+
+def idwt2d(input_node, wavelet, levels=1):
+    """
+    Constructs a TF graph that computes the 2D inverse DWT for a given wavelet.
+
+    Args:
+        input_node (tf.placeholder):             Input signal. A 3D tensor with dimensions
+                                                 as [rows, cols, channels]
+        wavelet (tfwavelets.dwtcoeffs.Wavelet):  Wavelet object.
+        levels (int):                            Number of levels.
+
+    Returns:
+        Output node of IDWT graph.
+    """
+
+    # First pass, corresponding to second pass in dwt2d
+    first_pass = tf.transpose(
+        idwt1d(
+            tf.transpose(input_node, perm=[1, 0, 2]),
+            wavelet,
+            1
+        ),
+        perm=[1, 0, 2]
+    )
+    second_pass = idwt1d(first_pass, wavelet, 1)
+
+    # Second pass, corresponding to first pass in dwt2d
+
+    return second_pass
