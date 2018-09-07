@@ -77,22 +77,7 @@ def dwt1d(input_node, wavelet, levels=1):
 
     last_level = input_node
 
-    # lp_adapted = adapt_filter(filter_coeffs[0])
-    # lp_mat = to_tf_mat(edge_matrices(filter_coeffs[0], 0))
-    #
-    # hp_adapted = adapt_filter(filter_coeffs[1])
-    # hp_mat = to_tf_mat(edge_matrices(filter_coeffs[1], 1))
-    #
-    # tf_lp = tf.constant(lp_adapted, dtype=tf.float32, shape=[len(filter_coeffs[0]), 1, 1])
-    # tf_hp = tf.constant(hp_adapted, dtype=tf.float32, shape=[len(filter_coeffs[1]), 1, 1])
-
     for level in range(levels):
-        # TODO: Convert stride kwarg to tuple
-        # TODO: Actual convolution, not correlation
-        # TODO: Periodic extention, not zero-padding
-        # lp_res = tf.nn.conv1d(last_level, tf_lp, stride=2, padding="SAME")
-        # hp_res = tf.nn.conv1d(last_level, tf_hp, stride=2, padding="SAME")
-
         lp_res = cyclic_conv1d(last_level, wavelet.decomp_lp)[:, ::2, :]
         hp_res = cyclic_conv1d(last_level, wavelet.decomp_hp)[:, ::2, :]
 
@@ -151,3 +136,4 @@ def dwt2d(input_node, wavelet, levels=1):
         last_level = tf.concat([upper_half, lower_half], 1)
 
     return last_level
+
