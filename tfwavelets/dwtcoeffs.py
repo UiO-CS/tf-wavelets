@@ -155,9 +155,9 @@ class Wavelet:
 # Haar wavelet
 haar = Wavelet(
     Filter(np.array([0.70710677, 0.70710677]), 0),
-    Filter(np.array([0.70710677, -0.70710677]), 1),
+    Filter(np.array([-0.70710677, 0.70710677]), 0),
     Filter(np.array([0.70710677, 0.70710677]), 0),
-    Filter(np.array([-0.70710677, 0.70710677]), 1),
+    Filter(np.array([0.70710677, -0.70710677]), 1),
 )
 
 # Daubechies wavelets

@@ -153,8 +153,8 @@ def dwt2d(input_node, wavelet, levels=1):
 
         last_level = tf.slice(second_pass, [0, 0, 0], [local_m // 2, local_n // 2, 1])
         coeffs[level] = [
-            tf.slice(second_pass, [0, local_n // 2, 0], [local_m // 2, local_n // 2, 1]),
             tf.slice(second_pass, [local_m // 2, 0, 0], [local_m // 2, local_n // 2, 1]),
+            tf.slice(second_pass, [0, local_n // 2, 0], [local_m // 2, local_n // 2, 1]),
             tf.slice(second_pass, [local_m // 2, local_n // 2, 0],
                      [local_m // 2, local_n // 2, 1])
         ]
