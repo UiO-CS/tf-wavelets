@@ -57,6 +57,36 @@ def cyclic_conv1d(input_node, filter_):
     return tf.concat((head, inner, tail), axis=1)
 
 
+def cyclic_conv1d_alt(input_node, filter_):
+    """
+    Alternative cyclic convolution. Uses more memory than cyclic_conv1d.
+
+    Args:
+        input_node:         Input signal
+        filter_ (Filter):   Filter object
+
+    Returns:
+        Tensor with the result of a periodic convolution.
+    """
+    kernel_node = filter_.coeffs
+
+    N = int(input_node.shape[1])
+
+    start = N - filter_.num_neg()
+    end = filter_.num_pos() - 1
+
+    # Perodically extend input signal
+    input_new = tf.concat(
+        (input_node[:, start:, :], input_node, input_node[:, 0:end, :]),
+        axis=1
+    )
+
+    # Convolve with periodic extension
+    result = tf.nn.conv1d(input_new, kernel_node[::-1], stride=1, padding="VALID")
+
+    return result
+
+
 def upsample(input_node, odd=False):
     """Upsamples. Doubles the length of the input, filling with zeros
 
@@ -107,8 +137,8 @@ def dwt1d(input_node, wavelet, levels=1):
     last_level = input_node
 
     for level in range(levels):
-        lp_res = cyclic_conv1d(last_level, wavelet.decomp_lp)[:, ::2, :]
-        hp_res = cyclic_conv1d(last_level, wavelet.decomp_hp)[:, 1::2, :]
+        lp_res = cyclic_conv1d_alt(last_level, wavelet.decomp_lp)[:, ::2, :]
+        hp_res = cyclic_conv1d_alt(last_level, wavelet.decomp_hp)[:, 1::2, :]
 
         last_level = lp_res
         coeffs[levels - level] = hp_res
@@ -189,8 +219,8 @@ def idwt1d(input_node, wavelet, levels=1):
     lowres_padded = upsample(lowres, odd=False)
     detail_padded = upsample(detail, odd=True)
 
-    lowres_filtered = cyclic_conv1d(lowres_padded, wavelet.recon_lp)
-    detail_filtered = cyclic_conv1d(detail_padded, wavelet.recon_hp)
+    lowres_filtered = cyclic_conv1d_alt(lowres_padded, wavelet.recon_lp)
+    detail_filtered = cyclic_conv1d_alt(detail_padded, wavelet.recon_hp)
 
     last_level = lowres_filtered + detail_filtered
 

@@ -74,6 +74,27 @@ class Filter:
             return self._coeffs.__getitem__(item + self.zero)
 
 
+    def num_pos(self):
+        """
+        Number of positive indexed coefficients in filter, including the origin. Ie,
+        strictly speaking it's the number of non-negative indexed coefficients.
+
+        Returns:
+            int: Number of positive indexed coefficients in filter.
+        """
+        return len(self._coeffs) - self.zero
+
+
+    def num_neg(self):
+        """
+        Number of negative indexed coefficients, excluding the origin.
+
+        Returns:
+            int: Number of negative indexed coefficients
+        """
+        return self.zero
+
+
     def _edge_matrices(self):
         """Computes the submatrices needed at the ends for circular convolution.
 
