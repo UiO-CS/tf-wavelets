@@ -240,18 +240,40 @@ def idwt2d(input_node, wavelet, levels=1):
     Returns:
         Output node of IDWT graph.
     """
+    m, n = int(input_node.shape[0]), int(input_node.shape[1])
+    first_m, first_n = m // (2 ** levels), n // (2 ** levels)
 
-    # First pass, corresponding to second pass in dwt2d
-    first_pass = tf.transpose(
-        idwt1d(
-            tf.transpose(input_node, perm=[1, 0, 2]),
-            wavelet,
-            1
-        ),
-        perm=[1, 0, 2]
-    )
-    second_pass = idwt1d(first_pass, wavelet, 1)
+    last_level = tf.slice(input_node, [0, 0, 0], [first_m, first_n, 1])
 
-    # Second pass, corresponding to first pass in dwt2d
+    for level in range(levels - 1, -1, -1):
+        local_m, local_n = m // (2 ** level), n // (2 ** level)
 
-    return second_pass
+        # Extract detail spaces
+        detail_tr = tf.slice(input_node, [local_m // 2, 0, 0],
+                             [local_n // 2, local_m // 2, 1])
+        detail_bl = tf.slice(input_node, [0, local_n // 2, 0],
+                             [local_n // 2, local_m // 2, 1])
+        detail_br = tf.slice(input_node, [local_n // 2, local_m // 2, 0],
+                             [local_n // 2, local_m // 2, 1])
+
+        # Construct image of this DWT level
+        upper_half = tf.concat([last_level, detail_tr], 0)
+        lower_half = tf.concat([detail_bl, detail_br], 0)
+
+        this_level = tf.concat([upper_half, lower_half], 1)
+
+        # First pass, corresponding to second pass in dwt2d
+        first_pass = tf.transpose(
+            idwt1d(
+                tf.transpose(this_level, perm=[1, 0, 2]),
+                wavelet,
+                1
+            ),
+            perm=[1, 0, 2]
+        )
+        # Second pass, corresponding to first pass in dwt2d
+        second_pass = idwt1d(first_pass, wavelet, 1)
+
+        last_level = second_pass
+
+    return last_level
