@@ -14,9 +14,7 @@ def check_orthonormality_1d(wavelet, tol=1e-5, N=8):
     error1 = np.sum(np.abs(matrix.T @ matrix - np.eye(N))) / N
     error2 = np.sum(np.abs(matrix @ matrix.T - np.eye(N))) / N
     assert error1 < tol, "Mean error: %g" % error1
-    print("Mean error: %g" % error1)
     assert error2 < tol, "Mean error: %g" % error2
-    print("Mean error: %g" % error2)
 
 
 def check_linearity_1d(wavelet, tol=1e-5, N=256):
@@ -31,7 +29,6 @@ def check_linearity_1d(wavelet, tol=1e-5, N=256):
 
     error = np.sum(np.abs(test1 - test2)) / (N ** 2)
     assert error < tol, "Mean error: %g" % error
-    print("Mean error: %g" % error)
 
 
 def check_linearity_2d(wavelet, tol=1e-5, N=256):
@@ -46,7 +43,6 @@ def check_linearity_2d(wavelet, tol=1e-5, N=256):
 
     error = np.sum(np.abs(test1 - test2)) / (N ** 2)
     assert error < tol, "Mean error: %g" % error
-    print("Mean error: %g" % error)
 
 
 def check_inverse_1d(wavelet, levels=1, tol=1e-4, N=256):
@@ -59,7 +55,6 @@ def check_inverse_1d(wavelet, levels=1, tol=1e-4, N=256):
 
     error = np.sum(np.abs(signal - reconstructed)) / (N)
     assert error < tol, "Mean error: %g" % error
-    print("Mean error: %g" % error)
 
 
 def check_inverse_2d(wavelet, levels=1, tol=1e-4, N=256):
@@ -72,7 +67,6 @@ def check_inverse_2d(wavelet, levels=1, tol=1e-4, N=256):
 
     error = np.sum(np.abs(signal - reconstructed)) / (N)
     assert error < tol, "Mean error: %g" % error
-    print("Mean error: %g" % error)
 
 
 def test_ortho_haar():
