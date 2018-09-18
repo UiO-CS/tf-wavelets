@@ -11,8 +11,8 @@ def check_orthonormality_1d(wavelet, tol=1e-5, N=8):
 
         matrix[:, i] = tfw.wrappers.dwt1d(unit, wavelet)
 
-    error1 = np.sum(np.abs(matrix.T @ matrix - np.eye(N))) / N
-    error2 = np.sum(np.abs(matrix @ matrix.T - np.eye(N))) / N
+    error1 = np.mean(np.abs(matrix.T @ matrix - np.eye(N)))
+    error2 = np.mean(np.abs(matrix @ matrix.T - np.eye(N)))
     assert error1 < tol, "Mean error: %g" % error1
     assert error2 < tol, "Mean error: %g" % error2
 
@@ -27,7 +27,7 @@ def check_linearity_1d(wavelet, tol=1e-5, N=256):
     test1 = tfw.wrappers.dwt1d(c1 * x1 + c2 * x2)
     test2 = c1 * tfw.wrappers.dwt1d(x1) + c2 * tfw.wrappers.dwt1d(x2)
 
-    error = np.sum(np.abs(test1 - test2)) / (N ** 2)
+    error = np.mean(np.abs(test1 - test2))
     assert error < tol, "Mean error: %g" % error
 
 
@@ -41,7 +41,7 @@ def check_linearity_2d(wavelet, tol=1e-5, N=256):
     test1 = tfw.wrappers.dwt2d(c1 * x1 + c2 * x2)
     test2 = c1 * tfw.wrappers.dwt2d(x1) + c2 * tfw.wrappers.dwt2d(x2)
 
-    error = np.sum(np.abs(test1 - test2)) / (N ** 2)
+    error = np.mean(np.abs(test1 - test2))
     assert error < tol, "Mean error: %g" % error
 
 
@@ -53,7 +53,7 @@ def check_inverse_1d(wavelet, levels=1, tol=1e-4, N=256):
         levels=levels
     )
 
-    error = np.sum(np.abs(signal - reconstructed)) / (N)
+    error = np.mean(np.abs(signal - reconstructed))
     assert error < tol, "Mean error: %g" % error
 
 
@@ -65,7 +65,7 @@ def check_inverse_2d(wavelet, levels=1, tol=1e-4, N=256):
         levels=levels
     )
 
-    error = np.sum(np.abs(signal - reconstructed)) / (N)
+    error = np.mean(np.abs(signal - reconstructed))
     assert error < tol, "Mean error: %g" % error
 
 
