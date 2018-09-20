@@ -213,16 +213,21 @@ def idwt1d(input_node, wavelet, levels=1):
     """
     m, n = int(input_node.shape[0]), int(input_node.shape[1])
 
-    lowres = tf.slice(input_node, [0, 0, 0], [m, n // 2, 1])
-    detail = tf.slice(input_node, [0, n // 2, 0], [m, n // 2, 1])
+    first_n = n // (2 ** levels)
+    last_level = tf.slice(input_node, [0, 0, 0], [m, first_n, 1])
 
-    lowres_padded = upsample(lowres, odd=False)
-    detail_padded = upsample(detail, odd=True)
+    for level in range(levels - 1, -1 , -1):
+        local_n = n // (2 ** level)
 
-    lowres_filtered = cyclic_conv1d_alt(lowres_padded, wavelet.recon_lp)
-    detail_filtered = cyclic_conv1d_alt(detail_padded, wavelet.recon_hp)
+        detail = tf.slice(input_node, [0, local_n//2, 0], [m, local_n//2, 1])
 
-    last_level = lowres_filtered + detail_filtered
+        lowres_padded = upsample(last_level, odd=False)
+        detail_padded = upsample(detail, odd=True)
+
+        lowres_filtered = cyclic_conv1d_alt(lowres_padded, wavelet.recon_lp)
+        detail_filtered = cyclic_conv1d_alt(detail_padded, wavelet.recon_hp)
+
+        last_level = lowres_filtered + detail_filtered
 
     return last_level
 

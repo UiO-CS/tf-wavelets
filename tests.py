@@ -101,6 +101,14 @@ def test_inverse_db2_1d():
     check_inverse_1d("db2", levels=1)
 
 
+def test_inverse_haar_1d_level2():
+    check_inverse_1d("haar", levels=2)
+
+
+def test_inverse_db2_1d_level2():
+    check_inverse_1d("db2", levels=2)
+
+
 def test_inverse_haar_2d():
     check_inverse_2d("haar", levels=2)
 
