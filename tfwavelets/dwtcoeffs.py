@@ -139,10 +139,47 @@ class Filter:
 
         # Indexing wrong when there are no negative indexed coefficients
         if num_neg == 1:
-            bottom_left = np.zeros((0,0), dtype=np.float32)
-            bottom_right = np.zeros((0,0), dtype=np.float32)
+            bottom_left = np.zeros((0, 0), dtype=np.float32)
+            bottom_right = np.zeros((0, 0), dtype=np.float32)
 
         return top_left, top_right, bottom_left, bottom_right
+
+
+class TrainableFilter(Filter):
+    """
+    Class representing a trainable filter.
+
+    Attributes:
+        coeffs (tf.Variable):      Filter coefficients
+        zero (int):                Origin of filter (which index of coeffs array is
+                                   actually indexed as 0).
+    """
+
+
+    def __init__(self, initial_coeffs, zero, name=None):
+        """
+        Create a trainable filter initialized with given filter coefficients
+
+        Args:
+            initial_coeffs (np.ndarray):    Initial filter coefficients
+            zero (int):                     Origin of filter (which index of coeffs array
+                                            is actually indexed as 0).
+            name (str):                     Optional. Name of tf variable created to hold
+                                            the filter coeffs.
+        """
+        super().__init__(initial_coeffs, zero)
+
+        self.coeffs = tf.Variable(
+            initial_value=adapt_filter(initial_coeffs),
+            trainable=True,
+            name=name,
+            dtype=tf.float32,
+            constraint=tf.keras.constraints.max_norm(1, [1, 2])
+        )
+
+        # Erase stuff that will be invalid once the filter coeffs has changed
+        self._coeffs = None
+        self.edge_matrices = None
 
 
 class Wavelet:
@@ -173,6 +210,33 @@ class Wavelet:
         self.recon_hp = recon_hp
 
 
+class TrainableWavelet(Wavelet):
+    """
+    Class representing a trainable wavelet
+
+    Attributes:
+        decomp_lp (TrainableFilter):    Filter coefficients for decomposition low pass filter
+        decomp_hp (TrainableFilter):    Filter coefficients for decomposition high pass filter
+        recon_lp (TrainableFilter):     Filter coefficients for reconstruction low pass filter
+        recon_hp (TrainableFilter):     Filter coefficients for reconstruction high pass filter
+    """
+
+
+    def __init__(self, wavelet):
+        """
+        Create a new trainable wavelet initialized as specified wavelet
+
+        Args:
+            wavelet (Wavelet):          Starting point for the trainable wavelet
+        """
+        super().__init__(
+            TrainableFilter(wavelet.decomp_lp._coeffs, wavelet.decomp_lp.zero),
+            TrainableFilter(wavelet.decomp_hp._coeffs, wavelet.decomp_hp.zero),
+            TrainableFilter(wavelet.recon_lp._coeffs, wavelet.recon_lp.zero),
+            TrainableFilter(wavelet.recon_hp._coeffs, wavelet.recon_hp.zero)
+        )
+
+
 # Haar wavelet
 haar = Wavelet(
     Filter(np.array([0.70710677, 0.70710677]), 1),
@@ -185,25 +249,22 @@ haar = Wavelet(
 db1 = haar
 db2 = Wavelet(
     Filter(np.array([-0.12940952255092145,
-                 0.22414386804185735,
-                 0.836516303737469,
-                 0.48296291314469025]), 3),
+                     0.22414386804185735,
+                     0.836516303737469,
+                     0.48296291314469025]), 3),
     Filter(np.array([-0.48296291314469025,
-                 0.836516303737469,
-                 -0.22414386804185735,
-                 -0.12940952255092145]), 0),
+                     0.836516303737469,
+                     -0.22414386804185735,
+                     -0.12940952255092145]), 0),
     Filter(np.array([0.48296291314469025,
-                    0.836516303737469,
-                    0.22414386804185735,
-                    -0.12940952255092145]), 0),
+                     0.836516303737469,
+                     0.22414386804185735,
+                     -0.12940952255092145]), 0),
     Filter(np.array([-0.12940952255092145,
-                    -0.22414386804185735,
-                    0.836516303737469,
-                    -0.48296291314469025]), 3)
+                     -0.22414386804185735,
+                     0.836516303737469,
+                     -0.48296291314469025]), 3)
 )
-
-
-
 
 # TODO: Convert to Wavelet/Filter class
 db3 = (np.array([0.035226291882100656,
