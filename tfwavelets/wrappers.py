@@ -171,5 +171,9 @@ def _parse_wavelet(wavelet_name):
         return tfw.dwtcoeffs.haar
     elif wavelet_name == "db2":
         return tfw.dwtcoeffs.db2
+    elif wavelet_name == "db3":
+        return tfw.dwtcoeffs.db3
+    elif wavelet_name == "db4":
+        return tfw.dwtcoeffs.db4
     else:
         raise ValueError("dwt1d does not support wavelet {}".format(wavelet))

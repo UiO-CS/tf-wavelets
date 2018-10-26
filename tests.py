@@ -72,59 +72,73 @@ def check_inverse_2d(wavelet, levels=1, tol=1e-4, N=256):
 def test_ortho_haar():
     check_orthonormality_1d("haar")
 
-
-def test_ortho_db2():
-    check_orthonormality_1d("db2")
-
-
 def test_linear_haar_1d():
     check_linearity_1d("haar")
-
-
-def test_linear_db2_1d():
-    check_linearity_1d("db2")
-
 
 def test_linear_haar_2d():
     check_linearity_2d("haar")
 
-
-def test_linear_db2_2d():
-    check_linearity_2d("db2")
-
-
 def test_inverse_haar_1d():
     check_inverse_1d("haar", levels=1)
-
-
-def test_inverse_db2_1d():
-    check_inverse_1d("db2", levels=1)
-
 
 def test_inverse_haar_1d_level2():
     check_inverse_1d("haar", levels=2)
 
-
-def test_inverse_db2_1d_level2():
-    check_inverse_1d("db2", levels=2)
-
-
 def test_inverse_haar_2d():
     check_inverse_2d("haar", levels=2)
 
+def test_ortho_db2():
+    check_orthonormality_1d("db2")
+
+def test_linear_db2_2d():
+    check_linearity_2d("db2")
+
+def test_linear_db2_1d():
+    check_linearity_1d("db2")
+
+def test_inverse_db2_1d():
+    check_inverse_1d("db2", levels=1)
+
+def test_inverse_db2_1d_level2():
+    check_inverse_1d("db2", levels=2)
 
 def test_inverse_db2_2d():
     check_inverse_2d("db2", levels=2)
 
 
-if __name__ == "__main__":
-    test_linear_haar_1d()
-    test_linear_db2_1d()
-    test_linear_db2_2d()
-    test_linear_haar_2d()
-    test_ortho_db2()
-    test_ortho_haar()
-    test_inverse_db2_2d()
-    test_inverse_haar_2d()
-    test_inverse_db2_1d()
-    test_inverse_haar_1d()
+def test_ortho_db3():
+    check_orthonormality_1d("db3")
+
+def test_linear_db3_2d():
+    check_linearity_2d("db3")
+
+def test_linear_db3_1d():
+    check_linearity_1d("db3")
+
+def test_inverse_db3_1d():
+    check_inverse_1d("db3", levels=1)
+
+def test_inverse_db3_1d_level2():
+    check_inverse_1d("db3", levels=2)
+
+def test_inverse_db3_2d():
+    check_inverse_2d("db3", levels=2)
+
+
+def test_ortho_db4():
+    check_orthonormality_1d("db4")
+
+def test_linear_db4_2d():
+    check_linearity_2d("db4")
+
+def test_linear_db4_1d():
+    check_linearity_1d("db4")
+
+def test_inverse_db4_1d():
+    check_inverse_1d("db4", levels=1)
+
+def test_inverse_db4_1d_level2():
+    check_inverse_1d("db4", levels=2)
+
+def test_inverse_db4_2d():
+    check_inverse_2d("db4", levels=2)
