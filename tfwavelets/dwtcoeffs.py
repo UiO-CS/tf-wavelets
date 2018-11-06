@@ -174,11 +174,11 @@ class TrainableFilter(Filter):
             trainable=True,
             name=name,
             dtype=tf.float32,
-            constraint=tf.keras.constraints.max_norm(1, [1, 2])
+            constraint=tf.keras.constraints.max_norm(np.sqrt(2), [1, 2])
         )
 
         # Erase stuff that will be invalid once the filter coeffs has changed
-        self._coeffs = None
+        self._coeffs = [None]*len(self._coeffs)
         self.edge_matrices = None
 
 
