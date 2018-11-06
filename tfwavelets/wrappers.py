@@ -154,12 +154,12 @@ def _construct_and_compute_graph(input_signal, node, wavelet_obj, levels):
     return np.squeeze(signal)
 
 
-def _parse_wavelet(wavelet_name):
+def _parse_wavelet(wavelet):
     """
     Look for wavelet coeffs in database, and return them if they exists
 
     Args:
-        wavelet_name (str):     Name of wavelet
+        wavelet (str):     Name of wavelet
 
     Returns:
         (np.ndarray, np.ndarray): Filters for wavelet
@@ -167,13 +167,13 @@ def _parse_wavelet(wavelet_name):
     Raises:
         ValueError: If wavelet is not supported
     """
-    if wavelet_name == "haar":
+    if wavelet == "haar":
         return tfw.dwtcoeffs.haar
-    elif wavelet_name == "db2":
+    elif wavelet == "db2":
         return tfw.dwtcoeffs.db2
-    elif wavelet_name == "db3":
+    elif wavelet == "db3":
         return tfw.dwtcoeffs.db3
-    elif wavelet_name == "db4":
+    elif wavelet == "db4":
         return tfw.dwtcoeffs.db4
     else:
         raise ValueError("dwt1d does not support wavelet {}".format(wavelet))
