@@ -1,0 +1,7 @@
+tfwavelets
+==========
+
+.. toctree::
+   :maxdepth: 4
+
+   tfwavelets

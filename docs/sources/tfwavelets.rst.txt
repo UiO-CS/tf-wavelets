@@ -1,0 +1,46 @@
+tfwavelets package
+==================
+
+Submodules
+----------
+
+tfwavelets.dwtcoeffs module
+---------------------------
+
+.. automodule:: tfwavelets.dwtcoeffs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tfwavelets.nodes module
+-----------------------
+
+.. automodule:: tfwavelets.nodes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tfwavelets.utils module
+-----------------------
+
+.. automodule:: tfwavelets.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+tfwavelets.wrappers module
+--------------------------
+
+.. automodule:: tfwavelets.wrappers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: tfwavelets
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,555 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>splinelib.fit &mdash; TF-Wavelets  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../static/jquery.js"></script>
+        <script type="text/javascript" src="../../static/underscore.js"></script>
+        <script type="text/javascript" src="../../static/doctools.js"></script>
+        <script type="text/javascript" src="../../static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> TF-Wavelets
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tfwavelets.html">tfwavelets package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TF-Wavelets</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>splinelib.fit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for splinelib.fit</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.splinelib</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="least_squares"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.least_squares">[docs]</a><span class="k">def</span> <span class="nf">least_squares</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">knots</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit a non-parametric spline function to the data using least squares optimization</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):      Data to fit from, with dimensions (m, 2). First column is</span>
+<span class="sd">                                x direction, and second column is y direction.</span>
+<span class="sd">        knots (np.ndarray):     Knot vector to fit spline onto</span>
+<span class="sd">        degree (int):           Desired degree of spline</span>
+<span class="sd">        weights (np.ndarray):   Optional. Associated weights to data, assumed to all be</span>
+<span class="sd">                                equal to 1 if omitted. Must be of the same dimensions as</span>
+<span class="sd">                                data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Spline: a spline function fitted to the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure float type to avoid integer computations</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Init space</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="n">SplineSpace</span><span class="p">(</span><span class="n">knots</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+
+    <span class="c1"># Get dimensions</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots</span><span class="p">)</span> <span class="o">-</span> <span class="n">degree</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># Initialize weights to 1 if arg is omitted</span>
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Construct data matrix and vector</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">space</span><span class="o">.</span><span class="n">find_knot_index</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">mu</span> <span class="o">-</span> <span class="n">degree</span><span class="p">:</span><span class="n">mu</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">space</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Mask out zero columns so we avoid a singular matrix in the normal equations</span>
+    <span class="n">non_zero_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.001</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="p">[:,</span> <span class="n">non_zero_cols</span><span class="p">]</span>
+
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Solve normal equations</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">(</span><span class="s2">&quot;No solution to normal equations&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Pad with zeros in c corresponding to where we removed columns from A</span>
+    <span class="n">c_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">non_zero_cols</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">non_zero_cols</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">non_zero_cols</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+            <span class="n">c_new</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Return spline using these coeffs</span>
+    <span class="k">return</span> <span class="n">space</span><span class="o">.</span><span class="n">create_spline</span><span class="p">(</span><span class="n">c_new</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="least_squares_3d"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.least_squares_3d">[docs]</a><span class="k">def</span> <span class="nf">least_squares_3d</span><span class="p">(</span><span class="n">data_x</span><span class="p">,</span> <span class="n">data_y</span><span class="p">,</span> <span class="n">data_f</span><span class="p">,</span> <span class="n">knots_x</span><span class="p">,</span> <span class="n">knots_y</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">weights_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">weights_y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit a non-parametric spline function in two variables to given data using least</span>
+<span class="sd">    squares optimization.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_x (np.ndarray):            Data points in x direction. Vector of size m1.</span>
+<span class="sd">        data_y (np.ndarray):            Data points in y direction. Vector of size m2.</span>
+<span class="sd">        data_f (np.ndarray):            Estimated function values for each x and y. Matrix</span>
+<span class="sd">                                        of shape (m1, m2).</span>
+<span class="sd">        knots_x (np.ndarray):           Knot vector for x space.</span>
+<span class="sd">        knots_y (np.ndarray):           Knot vector for y space.</span>
+<span class="sd">        degree (int):                   Degree of spline surface.</span>
+<span class="sd">        weights_x (np.ndarray):         Weight vector for x direction (of length m1).</span>
+<span class="sd">                                        Optional, defaults to 1s if omitted.</span>
+<span class="sd">        weights_y (np.ndarray):         Weight vector for y direction (of length m2).</span>
+<span class="sd">                                        Optional, defaults to 1s if omitted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        SplineSurface: A spline surface fitted to the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure float type to avoid integer computations</span>
+    <span class="n">data_x</span> <span class="o">=</span> <span class="n">data_x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">data_y</span> <span class="o">=</span> <span class="n">data_y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">data_f</span> <span class="o">=</span> <span class="n">data_f</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Default weights to 1 if omitted</span>
+    <span class="k">if</span> <span class="n">weights_x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">data_x</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weights_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">data_y</span><span class="p">)</span>
+
+    <span class="c1"># Init space</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="n">TensorProductSplineSpace</span><span class="p">([</span>
+        <span class="n">SplineSpace</span><span class="p">(</span><span class="n">knots_x</span><span class="p">,</span> <span class="n">degree</span><span class="p">),</span>
+        <span class="n">SplineSpace</span><span class="p">(</span><span class="n">knots_y</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+    <span class="p">])</span>
+
+    <span class="c1"># Get dimensions</span>
+    <span class="n">m1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_x</span><span class="p">)</span>
+    <span class="n">m2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_y</span><span class="p">)</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots_x</span><span class="p">)</span> <span class="o">-</span> <span class="n">degree</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots_y</span><span class="p">)</span> <span class="o">-</span> <span class="n">degree</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># Construct data matrices</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">m1</span><span class="p">,</span> <span class="n">n1</span><span class="p">])</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">m2</span><span class="p">,</span> <span class="n">n2</span><span class="p">])</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">])</span>
+
+    <span class="n">space_x</span><span class="p">,</span> <span class="n">space_y</span> <span class="o">=</span> <span class="n">space</span><span class="o">.</span><span class="n">get_spaces</span><span class="p">()</span>
+
+    <span class="c1"># Construct A</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m1</span><span class="p">):</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">space_x</span><span class="o">.</span><span class="n">find_knot_index</span><span class="p">(</span><span class="n">data_x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">mu</span> <span class="o">-</span> <span class="n">degree</span><span class="p">:</span><span class="n">mu</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weights_x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">space_x</span><span class="p">(</span><span class="n">data_x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># Construct B</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m2</span><span class="p">):</span>
+        <span class="n">nu</span> <span class="o">=</span> <span class="n">space_y</span><span class="o">.</span><span class="n">find_knot_index</span><span class="p">(</span><span class="n">data_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">nu</span> <span class="o">-</span> <span class="n">degree</span><span class="p">:</span><span class="n">nu</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weights_y</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">space_y</span><span class="p">(</span><span class="n">data_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="c1"># Construct G</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndindex</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+        <span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weights_x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">weights_y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">data_f</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+
+    <span class="c1"># Solve normal equations</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">G</span><span class="p">)</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">B</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">D</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">(</span><span class="s2">&quot;No solution to normal equations&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">space</span><span class="o">.</span><span class="n">create_spline</span><span class="p">(</span><span class="n">C</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="uniform"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.uniform">[docs]</a><span class="k">def</span> <span class="nf">uniform</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a column vector with parametrization for the data using the uniform</span>
+<span class="sd">    parametrization scheme.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):         Points to parametrize</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Uniform parametrization of the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="cord_length"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.cord_length">[docs]</a><span class="k">def</span> <span class="nf">cord_length</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a column vector with parametrization for the data using the cord length</span>
+<span class="sd">    parametrization scheme.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):         Points to parametrize</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Cord length parametrization of the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)):</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">u</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="centripetal"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.centripetal">[docs]</a><span class="k">def</span> <span class="nf">centripetal</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a column vector with parametrization for the data using the centripetal</span>
+<span class="sd">    parametrization scheme.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):         Points to parametrize</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Centripetal parametrization of the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)):</span>
+        <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">u</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="fit_curve"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.fit_curve">[docs]</a><span class="k">def</span> <span class="nf">fit_curve</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">knots</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">least_squares</span><span class="p">,</span> <span class="n">parametrization</span><span class="o">=</span><span class="n">cord_length</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fits a parametric curve of arbitrary dimension D from m given data points</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):              Data to fit curve from. An (m, D) matrix.</span>
+<span class="sd">        knots (np.ndarray):             Knot vector.</span>
+<span class="sd">        degree (int):                   Degree of desired spline.</span>
+<span class="sd">        method (callable):              Optional. Method for approximation. Available</span>
+<span class="sd">                                        options are</span>
+<span class="sd">                                            - splinelib.fit.least_squares</span>
+<span class="sd">        parametrization (callable):     Optional. Method for parametrization. Available</span>
+<span class="sd">                                        options are</span>
+<span class="sd">                                            - splinelib.fit.uniform</span>
+<span class="sd">                                            - splinelib.fit.cord_length</span>
+<span class="sd">                                            - splinelib.fit.centripetal</span>
+<span class="sd">                                        Default is cord_length.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Spline: A spline curve fitted to the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots</span><span class="p">)</span> <span class="o">-</span> <span class="n">degree</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Generate parametrization and augment data</span>
+    <span class="n">par</span> <span class="o">=</span> <span class="n">parametrization</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">par</span><span class="p">,</span> <span class="n">data</span><span class="p">])</span>
+
+    <span class="c1"># Approximate coeffs in each dimension</span>
+    <span class="k">for</span> <span class="n">dimension</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D</span><span class="p">):</span>
+        <span class="n">subset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">dimension</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="n">dimension</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">knots</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span><span class="o">.</span><span class="n">get_coeffs</span><span class="p">()</span>
+
+    <span class="c1"># Create spline and return</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="n">SplineSpace</span><span class="p">(</span><span class="n">knots</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">space</span><span class="o">.</span><span class="n">create_spline</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fit_surface"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.fit_surface">[docs]</a><span class="k">def</span> <span class="nf">fit_surface</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">knots_u</span><span class="p">,</span> <span class="n">knots_v</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">least_squares_3d</span><span class="p">,</span>
+                <span class="n">parametrization</span><span class="o">=</span><span class="n">cord_length</span><span class="p">,</span> <span class="n">par_u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">par_v</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit a parametric spline surface to given data of arbitrary dimension D.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):          A data matrix with shape (n1, n2, D), where n1 and n2</span>
+<span class="sd">                                    are the number of points in each parameter direction,</span>
+<span class="sd">                                    and D is the dimension of space (typically 3).</span>
+<span class="sd">        knots_u (np.ndarray):       Knot vector in u direction.</span>
+<span class="sd">        knots_v (np.ndarray):       Knot vecotr in v direction.</span>
+<span class="sd">        degree (int):               Degree of splines.</span>
+<span class="sd">        method (callable):          Approximation method. Available options are:</span>
+<span class="sd">                                        - spinelib.fit.least_squares_3d</span>
+<span class="sd">                                    Optional. Default is least_squares_3d.</span>
+<span class="sd">        parametrization (callable): Scheme for generation of parametrization. Options are:</span>
+<span class="sd">                                        - splinelib.fit.uniform</span>
+<span class="sd">                                        - splinelib.fit.cord_length</span>
+<span class="sd">                                        - splinelib.fit.centripetal</span>
+<span class="sd">                                    Optional. Default is cord_length.</span>
+<span class="sd">        par_u (np.ndarray):         Override parametrization in u direction (this ignores</span>
+<span class="sd">                                    whatever that is passed as &#39;parametrization&#39;).</span>
+<span class="sd">        par_v (np.ndarray):         Override parametrization in v direction (this ignores</span>
+<span class="sd">                                    whatever that is passed as &#39;parametrization&#39;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        SplineSurface: A parametrix surface fitted to the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Do parametrization if necessary</span>
+    <span class="k">if</span> <span class="n">par_u</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">par_u</span> <span class="o">=</span> <span class="n">parametrization</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">par_v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">par_v</span> <span class="o">=</span> <span class="n">parametrization</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Get implicit parameter values</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">m1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots_u</span><span class="p">)</span> <span class="o">-</span> <span class="n">degree</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">m2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots_v</span><span class="p">)</span> <span class="o">-</span> <span class="n">degree</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># Initialize result array</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="n">D</span><span class="p">])</span>
+
+    <span class="c1"># Fit each dimension using requested method</span>
+    <span class="k">for</span> <span class="n">dimension</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D</span><span class="p">):</span>
+        <span class="n">coeffs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span>
+            <span class="n">par_u</span><span class="p">,</span>
+            <span class="n">par_v</span><span class="p">,</span>
+            <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">dimension</span><span class="p">],</span>
+            <span class="n">knots_u</span><span class="p">,</span>
+            <span class="n">knots_v</span><span class="p">,</span> <span class="mi">3</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">get_coeffs</span><span class="p">()</span>
+
+    <span class="c1"># Create space and resulting surface.</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="n">TensorProductSplineSpace</span><span class="p">([</span>
+        <span class="n">SplineSpace</span><span class="p">(</span><span class="n">knots_u</span><span class="p">,</span> <span class="n">degree</span><span class="p">),</span>
+        <span class="n">SplineSpace</span><span class="p">(</span><span class="n">knots_v</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="k">return</span> <span class="n">space</span><span class="o">.</span><span class="n">create_spline</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate_uniform_knots"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.generate_uniform_knots">[docs]</a><span class="k">def</span> <span class="nf">generate_uniform_knots</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">regular</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a d+1-extended knot vector for the data, with knots uniformly distributed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray):  Data to fit knots from (parametrization). Used to find min and</span>
+<span class="sd">                            max value needed.</span>
+<span class="sd">        degree (int):       Degree of spline to fit on knot vector.</span>
+<span class="sd">        length (int):       Optional. Length of created knot vector. Default is 20.</span>
+<span class="sd">        regular (bool):     Optional. Make vector d+1-regular in addition to d+1-extended.</span>
+<span class="sd">                            Default is True</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A knot vector for the data with knots uniformly distributed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Find min and max, and store something slightly less/bigger</span>
+    <span class="n">minval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">maxval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-12</span>
+
+    <span class="c1"># Create inner knots, each with a multiplicity of 1</span>
+    <span class="n">inner_knots</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">degree</span><span class="p">),</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
+        <span class="c1"># Pad with d+1 entries of min/maxval at the ends to make the knot d+1-regular</span>
+        <span class="n">knots</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">degree</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">inner_knots</span><span class="p">))</span>
+        <span class="n">knots</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">degree</span><span class="p">]</span> <span class="o">=</span> <span class="n">degree</span> <span class="o">*</span> <span class="p">[</span><span class="n">minval</span><span class="p">]</span>
+        <span class="n">knots</span><span class="p">[</span><span class="n">degree</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">inner_knots</span><span class="p">)</span> <span class="o">+</span> <span class="n">degree</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_knots</span>
+        <span class="n">knots</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">inner_knots</span><span class="p">)</span> <span class="o">+</span> <span class="n">degree</span><span class="p">:]</span> <span class="o">=</span> <span class="n">degree</span> <span class="o">*</span> <span class="p">[</span><span class="n">maxval</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Find step size and continue d+1 times in each direction</span>
+        <span class="n">step_size</span> <span class="o">=</span> <span class="n">inner_knots</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">inner_knots</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">knots</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minval</span> <span class="o">-</span> <span class="p">(</span><span class="n">degree</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span>
+                            <span class="n">maxval</span> <span class="o">+</span> <span class="p">(</span><span class="n">degree</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span>
+                            <span class="n">length</span><span class="p">,</span>
+                            <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Shift knots with something very small to cope with rounding errors (knot indices</span>
+    <span class="c1"># will depend on stuff being strictly smaller).</span>
+    <span class="k">return</span> <span class="n">knots</span> <span class="o">-</span> <span class="mf">1e-13</span></div>
+
+
+<div class="viewcode-block" id="sample"><a class="viewcode-back" href="../../tfwavelets.html#splinelib.fit.sample">[docs]</a><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">spline</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Samples the spline uniformly, and returns points.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spline (Spline):    Spline to sample</span>
+<span class="sd">        num (int):          Number of points to sample. Optional, defaults to 20.</span>
+<span class="sd">        min (int):          Lower bound of sampling range. Optional, defaults to lower</span>
+<span class="sd">                            bound of the support for the spline if omitted.</span>
+<span class="sd">        max (int):          Upper bound of sampling range. Optional, defaults to upper</span>
+<span class="sd">                            bound of the support for the spline if omitted.</span>
+
+<span class="sd">    Returns (np.ndarray): Sampled points</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">min</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">get_support</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">get_support</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">spline</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Kristian Monsen Haug and Mathias Lohne
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

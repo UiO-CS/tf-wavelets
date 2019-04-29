@@ -1,0 +1,472 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tfwavelets.nodes &mdash; TF-Wavelets  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../static/jquery.js"></script>
+        <script type="text/javascript" src="../../static/underscore.js"></script>
+        <script type="text/javascript" src="../../static/doctools.js"></script>
+        <script type="text/javascript" src="../../static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> TF-Wavelets
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tfwavelets.html">tfwavelets package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TF-Wavelets</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>tfwavelets.nodes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tfwavelets.nodes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The &#39;nodes&#39; module contains methods to construct TF subgraphs computing the 1D or 2D DWT</span>
+<span class="sd">or IDWT. Intended to be used if you need a DWT in your own TF graph.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="cyclic_conv1d"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.cyclic_conv1d">[docs]</a><span class="k">def</span> <span class="nf">cyclic_conv1d</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">filter_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cyclic convolution</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node:  Input signal (3-tensor [batch, width, in_channels])</span>
+<span class="sd">        filter_:     Filter</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor with the result of a periodic convolution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create shorthands for TF nodes</span>
+    <span class="n">kernel_node</span> <span class="o">=</span> <span class="n">filter_</span><span class="o">.</span><span class="n">coeffs</span>
+    <span class="n">tl_node</span><span class="p">,</span> <span class="n">tr_node</span><span class="p">,</span> <span class="n">bl_node</span><span class="p">,</span> <span class="n">br_node</span> <span class="o">=</span> <span class="n">filter_</span><span class="o">.</span><span class="n">edge_matrices</span>
+
+    <span class="c1"># Do inner convolution</span>
+    <span class="n">inner</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">kernel_node</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Create shorthands for shapes</span>
+    <span class="n">input_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">input_node</span><span class="p">)</span>
+    <span class="n">tl_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">tl_node</span><span class="p">)</span>
+    <span class="n">tr_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">tr_node</span><span class="p">)</span>
+    <span class="n">bl_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">bl_node</span><span class="p">)</span>
+    <span class="n">br_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">br_node</span><span class="p">)</span>
+
+    <span class="c1"># Slices of the input signal corresponding to the corners</span>
+    <span class="n">tl_slice</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tl_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">tr_slice</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tr_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tr_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">bl_slice</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">bl_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">br_slice</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">br_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">br_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># TODO: It just werks (It&#39;s the magic of the algorithm). i.e. Why do we have to transpose?</span>
+    <span class="n">tl</span> <span class="o">=</span> <span class="n">tl_node</span> <span class="o">@</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tl_slice</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">tr_node</span> <span class="o">@</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tr_slice</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">bl</span> <span class="o">=</span> <span class="n">bl_node</span> <span class="o">@</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">bl_slice</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">br</span> <span class="o">=</span> <span class="n">br_node</span> <span class="o">@</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">br_slice</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">head</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tl</span> <span class="o">+</span> <span class="n">tr</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">tail</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">bl</span> <span class="o">+</span> <span class="n">br</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">head</span><span class="p">,</span> <span class="n">inner</span><span class="p">,</span> <span class="n">tail</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cyclic_conv1d_alt"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.cyclic_conv1d_alt">[docs]</a><span class="k">def</span> <span class="nf">cyclic_conv1d_alt</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">filter_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Alternative cyclic convolution. Uses more memory than cyclic_conv1d.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node:         Input signal</span>
+<span class="sd">        filter_ (Filter):   Filter object</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor with the result of a periodic convolution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kernel_node</span> <span class="o">=</span> <span class="n">filter_</span><span class="o">.</span><span class="n">coeffs</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">filter_</span><span class="o">.</span><span class="n">num_neg</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">filter_</span><span class="o">.</span><span class="n">num_pos</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># Perodically extend input signal</span>
+    <span class="n">input_new</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">input_node</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">input_node</span><span class="p">,</span> <span class="n">input_node</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="p">:]),</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Convolve with periodic extension</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">input_new</span><span class="p">,</span> <span class="n">kernel_node</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="upsample"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.upsample">[docs]</a><span class="k">def</span> <span class="nf">upsample</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">odd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Upsamples. Doubles the length of the input, filling with zeros</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node: 3-tensor [batch, spatial dim, channels] to be upsampled</span>
+<span class="sd">        odd:        Bool, optional. If True, content of input_node will be</span>
+<span class="sd">                    placed on the odd indeces of the output. Otherwise, the</span>
+<span class="sd">                    content will be places on the even indeces. This is the</span>
+<span class="sd">                    default behaviour.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The upsampled output Tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">col</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">col</span><span class="p">)])</span>
+
+    <span class="k">if</span> <span class="n">odd</span><span class="p">:</span>
+        <span class="c1"># https://stackoverflow.com/questions/30097512/how-to-perform-a-pairwise-swap-of-a-list</span>
+        <span class="c1"># TODO: Understand</span>
+        <span class="c1"># Rounds down to even number</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">-</span><span class="mi">2</span>
+        <span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">columns</span><span class="p">[:</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># TODO: Should we actually expand the dimension?</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dwt1d"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.dwt1d">[docs]</a><span class="k">def</span> <span class="nf">dwt1d</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs a TF computational graph computing the 1D DWT of an input signal.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node:     A 3D tensor containing the signal. The dimensions should be</span>
+<span class="sd">                        [batch, signal, channels].</span>
+<span class="sd">        wavelet:        Wavelet object</span>
+<span class="sd">        levels:         Number of levels.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The output node of the DWT graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Check that level is a reasonable number</span>
+    <span class="c1"># TODO: Check types</span>
+
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">last_level</span> <span class="o">=</span> <span class="n">input_node</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+        <span class="n">lp_res</span> <span class="o">=</span> <span class="n">cyclic_conv1d_alt</span><span class="p">(</span><span class="n">last_level</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">.</span><span class="n">decomp_lp</span><span class="p">)[:,</span> <span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">hp_res</span> <span class="o">=</span> <span class="n">cyclic_conv1d_alt</span><span class="p">(</span><span class="n">last_level</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">.</span><span class="n">decomp_hp</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="n">last_level</span> <span class="o">=</span> <span class="n">lp_res</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="n">levels</span> <span class="o">-</span> <span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="n">hp_res</span>
+
+    <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_level</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dwt2d"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.dwt2d">[docs]</a><span class="k">def</span> <span class="nf">dwt2d</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs a TF computational graph computing the 2D DWT of an input signal.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node:     A 3D tensor containing the signal. The dimensions should be</span>
+<span class="sd">                        [rows, cols, channels].</span>
+<span class="sd">        wavelet:        Wavelet object.</span>
+<span class="sd">        levels:         Number of levels.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The output node of the DWT graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Check that level is a reasonable number</span>
+    <span class="c1"># TODO: Check types</span>
+
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">levels</span>
+
+    <span class="n">last_level</span> <span class="o">=</span> <span class="n">input_node</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+        <span class="n">local_m</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">=</span> <span class="n">m</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">level</span><span class="p">),</span> <span class="n">n</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">level</span><span class="p">)</span>
+
+        <span class="n">first_pass</span> <span class="o">=</span> <span class="n">dwt1d</span><span class="p">(</span><span class="n">last_level</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">second_pass</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+            <span class="n">dwt1d</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">first_pass</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+                <span class="n">wavelet</span><span class="p">,</span>
+                <span class="mi">1</span>
+            <span class="p">),</span>
+            <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">last_level</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">second_pass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">second_pass</span><span class="p">,</span> <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">second_pass</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">second_pass</span><span class="p">,</span> <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                     <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">upper_half</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">last_level</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">[</span><span class="n">level</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">lower_half</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">coeffs</span><span class="p">[</span><span class="n">level</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">coeffs</span><span class="p">[</span><span class="n">level</span><span class="p">][</span><span class="mi">2</span><span class="p">]],</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">last_level</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">upper_half</span><span class="p">,</span> <span class="n">lower_half</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">last_level</span></div>
+
+
+<div class="viewcode-block" id="idwt1d"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.idwt1d">[docs]</a><span class="k">def</span> <span class="nf">idwt1d</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs a TF graph that computes the 1D inverse DWT for a given wavelet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node (tf.placeholder):             Input signal. A 3D tensor with dimensions</span>
+<span class="sd">                                                 as [batch, signal, channels]</span>
+<span class="sd">        wavelet (tfwavelets.dwtcoeffs.Wavelet):  Wavelet object.</span>
+<span class="sd">        levels (int):                            Number of levels.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Output node of IDWT graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">first_n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">levels</span><span class="p">)</span>
+    <span class="n">last_level</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="n">first_n</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">local_n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">level</span><span class="p">)</span>
+
+        <span class="n">detail</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">local_n</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="n">local_n</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">lowres_padded</span> <span class="o">=</span> <span class="n">upsample</span><span class="p">(</span><span class="n">last_level</span><span class="p">,</span> <span class="n">odd</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">detail_padded</span> <span class="o">=</span> <span class="n">upsample</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">odd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">lowres_filtered</span> <span class="o">=</span> <span class="n">cyclic_conv1d_alt</span><span class="p">(</span><span class="n">lowres_padded</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">.</span><span class="n">recon_lp</span><span class="p">)</span>
+        <span class="n">detail_filtered</span> <span class="o">=</span> <span class="n">cyclic_conv1d_alt</span><span class="p">(</span><span class="n">detail_padded</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">.</span><span class="n">recon_hp</span><span class="p">)</span>
+
+        <span class="n">last_level</span> <span class="o">=</span> <span class="n">lowres_filtered</span> <span class="o">+</span> <span class="n">detail_filtered</span>
+
+    <span class="k">return</span> <span class="n">last_level</span></div>
+
+
+<div class="viewcode-block" id="idwt2d"><a class="viewcode-back" href="../../tfwavelets.html#tfwavelets.nodes.idwt2d">[docs]</a><span class="k">def</span> <span class="nf">idwt2d</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs a TF graph that computes the 2D inverse DWT for a given wavelet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_node (tf.placeholder):             Input signal. A 3D tensor with dimensions</span>
+<span class="sd">                                                 as [rows, cols, channels]</span>
+<span class="sd">        wavelet (tfwavelets.dwtcoeffs.Wavelet):  Wavelet object.</span>
+<span class="sd">        levels (int):                            Number of levels.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Output node of IDWT graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">first_m</span><span class="p">,</span> <span class="n">first_n</span> <span class="o">=</span> <span class="n">m</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">levels</span><span class="p">),</span> <span class="n">n</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">levels</span><span class="p">)</span>
+
+    <span class="n">last_level</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">first_m</span><span class="p">,</span> <span class="n">first_n</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">local_m</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">=</span> <span class="n">m</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">level</span><span class="p">),</span> <span class="n">n</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">level</span><span class="p">)</span>
+
+        <span class="c1"># Extract detail spaces</span>
+        <span class="n">detail_tr</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="p">[</span><span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">detail_bl</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">detail_br</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">input_node</span><span class="p">,</span> <span class="p">[</span><span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="n">local_n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">local_m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Construct image of this DWT level</span>
+        <span class="n">upper_half</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">last_level</span><span class="p">,</span> <span class="n">detail_tr</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">lower_half</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">detail_bl</span><span class="p">,</span> <span class="n">detail_br</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">this_level</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">upper_half</span><span class="p">,</span> <span class="n">lower_half</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># First pass, corresponding to second pass in dwt2d</span>
+        <span class="n">first_pass</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+            <span class="n">idwt1d</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">this_level</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+                <span class="n">wavelet</span><span class="p">,</span>
+                <span class="mi">1</span>
+            <span class="p">),</span>
+            <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># Second pass, corresponding to first pass in dwt2d</span>
+        <span class="n">second_pass</span> <span class="o">=</span> <span class="n">idwt1d</span><span class="p">(</span><span class="n">first_pass</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">last_level</span> <span class="o">=</span> <span class="n">second_pass</span>
+
+    <span class="k">return</span> <span class="n">last_level</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Kristian Monsen Haug and Mathias Lohne
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

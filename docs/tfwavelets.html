@@ -1,0 +1,727 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tfwavelets package &mdash; TF-Wavelets  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="static/documentation_options.js"></script>
+        <script type="text/javascript" src="static/jquery.js"></script>
+        <script type="text/javascript" src="static/underscore.js"></script>
+        <script type="text/javascript" src="static/doctools.js"></script>
+        <script type="text/javascript" src="static/language_data.js"></script>
+    
+    <script type="text/javascript" src="static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to TF-Wavelets’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> TF-Wavelets
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">tfwavelets package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfwavelets.dwtcoeffs">tfwavelets.dwtcoeffs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfwavelets.nodes">tfwavelets.nodes module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfwavelets.utils">tfwavelets.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfwavelets.wrappers">tfwavelets.wrappers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfwavelets">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TF-Wavelets</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>tfwavelets package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="sources/tfwavelets.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tfwavelets-package">
+<h1>tfwavelets package<a class="headerlink" href="#tfwavelets-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-tfwavelets.dwtcoeffs">
+<span id="tfwavelets-dwtcoeffs-module"></span><h2>tfwavelets.dwtcoeffs module<a class="headerlink" href="#module-tfwavelets.dwtcoeffs" title="Permalink to this headline">¶</a></h2>
+<p>The ‘dwtcoeffs’ module contains predefined wavelets, as well as the classes necessary to
+create more user-defined wavelets.</p>
+<p>Wavelets are defined by the Wavelet class. A Wavelet object mainly consists of four Filter
+objects (defined by the Filter class) representing the decomposition and reconstruction
+low pass and high pass filters.</p>
+<p class="rubric">Examples</p>
+<p>You can define your own wavelet by creating four filters, and combining them to a wavelet:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decomp_lp</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decomp_hp</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">recon_lp</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">recon_hp</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">haar</span> <span class="o">=</span> <span class="n">Wavelet</span><span class="p">(</span><span class="n">decomp_lp</span><span class="p">,</span> <span class="n">decomp_hp</span><span class="p">,</span> <span class="n">recon_lp</span><span class="p">,</span> <span class="n">recon_hp</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="tfwavelets.dwtcoeffs.Filter">
+<em class="property">class </em><code class="descclassname">tfwavelets.dwtcoeffs.</code><code class="descname">Filter</code><span class="sig-paren">(</span><em>coeffs</em>, <em>zero</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/dwtcoeffs.html#Filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.dwtcoeffs.Filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing a filter.</p>
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Filter.coeffs">
+<code class="descname">coeffs</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Filter.coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tf.constant</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Filter.zero">
+<code class="descname">zero</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Filter.zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Origin of filter (which index of coeffs array is
+actually indexed as 0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Filter.edge_matrices">
+<code class="descname">edge_matrices</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Filter.edge_matrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of edge matrices, used for circular convolution.
+Stored as 3D TF tensors (constants).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>iterable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tfwavelets.dwtcoeffs.Filter.num_neg">
+<code class="descname">num_neg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/dwtcoeffs.html#Filter.num_neg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.dwtcoeffs.Filter.num_neg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of negative indexed coefficients, excluding the origin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of negative indexed coefficients</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tfwavelets.dwtcoeffs.Filter.num_pos">
+<code class="descname">num_pos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/dwtcoeffs.html#Filter.num_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.dwtcoeffs.Filter.num_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of positive indexed coefficients in filter, including the origin. Ie,
+strictly speaking it’s the number of non-negative indexed coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of positive indexed coefficients in filter.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tfwavelets.dwtcoeffs.TrainableFilter">
+<em class="property">class </em><code class="descclassname">tfwavelets.dwtcoeffs.</code><code class="descname">TrainableFilter</code><span class="sig-paren">(</span><em>initial_coeffs</em>, <em>zero</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/dwtcoeffs.html#TrainableFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfwavelets.dwtcoeffs.Filter" title="tfwavelets.dwtcoeffs.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfwavelets.dwtcoeffs.Filter</span></code></a></p>
+<p>Class representing a trainable filter.</p>
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.TrainableFilter.coeffs">
+<code class="descname">coeffs</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableFilter.coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tf.Variable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.TrainableFilter.zero">
+<code class="descname">zero</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableFilter.zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Origin of filter (which index of coeffs array is
+actually indexed as 0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tfwavelets.dwtcoeffs.TrainableWavelet">
+<em class="property">class </em><code class="descclassname">tfwavelets.dwtcoeffs.</code><code class="descname">TrainableWavelet</code><span class="sig-paren">(</span><em>wavelet</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/dwtcoeffs.html#TrainableWavelet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableWavelet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfwavelets.dwtcoeffs.Wavelet" title="tfwavelets.dwtcoeffs.Wavelet"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfwavelets.dwtcoeffs.Wavelet</span></code></a></p>
+<p>Class representing a trainable wavelet</p>
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.TrainableWavelet.decomp_lp">
+<code class="descname">decomp_lp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableWavelet.decomp_lp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for decomposition low pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.TrainableFilter" title="tfwavelets.dwtcoeffs.TrainableFilter">TrainableFilter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.TrainableWavelet.decomp_hp">
+<code class="descname">decomp_hp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableWavelet.decomp_hp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for decomposition high pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.TrainableFilter" title="tfwavelets.dwtcoeffs.TrainableFilter">TrainableFilter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.TrainableWavelet.recon_lp">
+<code class="descname">recon_lp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableWavelet.recon_lp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for reconstruction low pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.TrainableFilter" title="tfwavelets.dwtcoeffs.TrainableFilter">TrainableFilter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.TrainableWavelet.recon_hp">
+<code class="descname">recon_hp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.TrainableWavelet.recon_hp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for reconstruction high pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.TrainableFilter" title="tfwavelets.dwtcoeffs.TrainableFilter">TrainableFilter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tfwavelets.dwtcoeffs.Wavelet">
+<em class="property">class </em><code class="descclassname">tfwavelets.dwtcoeffs.</code><code class="descname">Wavelet</code><span class="sig-paren">(</span><em>decomp_lp</em>, <em>decomp_hp</em>, <em>recon_lp</em>, <em>recon_hp</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/dwtcoeffs.html#Wavelet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.dwtcoeffs.Wavelet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing a wavelet.</p>
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Wavelet.decomp_lp">
+<code class="descname">decomp_lp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Wavelet.decomp_lp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for decomposition low pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.Filter" title="tfwavelets.dwtcoeffs.Filter">Filter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Wavelet.decomp_hp">
+<code class="descname">decomp_hp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Wavelet.decomp_hp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for decomposition high pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.Filter" title="tfwavelets.dwtcoeffs.Filter">Filter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Wavelet.recon_lp">
+<code class="descname">recon_lp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Wavelet.recon_lp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for reconstruction low pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.Filter" title="tfwavelets.dwtcoeffs.Filter">Filter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tfwavelets.dwtcoeffs.Wavelet.recon_hp">
+<code class="descname">recon_hp</code><a class="headerlink" href="#tfwavelets.dwtcoeffs.Wavelet.recon_hp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter coefficients for reconstruction high pass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tfwavelets.dwtcoeffs.Filter" title="tfwavelets.dwtcoeffs.Filter">Filter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfwavelets.nodes">
+<span id="tfwavelets-nodes-module"></span><h2>tfwavelets.nodes module<a class="headerlink" href="#module-tfwavelets.nodes" title="Permalink to this headline">¶</a></h2>
+<p>The ‘nodes’ module contains methods to construct TF subgraphs computing the 1D or 2D DWT
+or IDWT. Intended to be used if you need a DWT in your own TF graph.</p>
+<dl class="function">
+<dt id="tfwavelets.nodes.cyclic_conv1d">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">cyclic_conv1d</code><span class="sig-paren">(</span><em>input_node</em>, <em>filter_</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#cyclic_conv1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.cyclic_conv1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cyclic convolution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> – Input signal (3-tensor [batch, width, in_channels])</p></li>
+<li><p><strong>filter</strong> – Filter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tensor with the result of a periodic convolution</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.nodes.cyclic_conv1d_alt">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">cyclic_conv1d_alt</code><span class="sig-paren">(</span><em>input_node</em>, <em>filter_</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#cyclic_conv1d_alt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.cyclic_conv1d_alt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative cyclic convolution. Uses more memory than cyclic_conv1d.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> – Input signal</p></li>
+<li><p><strong>filter</strong> (<a class="reference internal" href="#tfwavelets.dwtcoeffs.Filter" title="tfwavelets.dwtcoeffs.Filter"><em>Filter</em></a>) – Filter object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tensor with the result of a periodic convolution.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.nodes.dwt1d">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">dwt1d</code><span class="sig-paren">(</span><em>input_node</em>, <em>wavelet</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#dwt1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.dwt1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a TF computational graph computing the 1D DWT of an input signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> – A 3D tensor containing the signal. The dimensions should be
+[batch, signal, channels].</p></li>
+<li><p><strong>wavelet</strong> – Wavelet object</p></li>
+<li><p><strong>levels</strong> – Number of levels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output node of the DWT graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.nodes.dwt2d">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">dwt2d</code><span class="sig-paren">(</span><em>input_node</em>, <em>wavelet</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#dwt2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.dwt2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a TF computational graph computing the 2D DWT of an input signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> – A 3D tensor containing the signal. The dimensions should be
+[rows, cols, channels].</p></li>
+<li><p><strong>wavelet</strong> – Wavelet object.</p></li>
+<li><p><strong>levels</strong> – Number of levels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output node of the DWT graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.nodes.idwt1d">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">idwt1d</code><span class="sig-paren">(</span><em>input_node</em>, <em>wavelet</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#idwt1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.idwt1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a TF graph that computes the 1D inverse DWT for a given wavelet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> (<em>tf.placeholder</em>) – Input signal. A 3D tensor with dimensions
+as [batch, signal, channels]</p></li>
+<li><p><strong>wavelet</strong> (<a class="reference internal" href="#tfwavelets.dwtcoeffs.Wavelet" title="tfwavelets.dwtcoeffs.Wavelet"><em>tfwavelets.dwtcoeffs.Wavelet</em></a>) – Wavelet object.</p></li>
+<li><p><strong>levels</strong> (<em>int</em>) – Number of levels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output node of IDWT graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.nodes.idwt2d">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">idwt2d</code><span class="sig-paren">(</span><em>input_node</em>, <em>wavelet</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#idwt2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.idwt2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a TF graph that computes the 2D inverse DWT for a given wavelet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> (<em>tf.placeholder</em>) – Input signal. A 3D tensor with dimensions
+as [rows, cols, channels]</p></li>
+<li><p><strong>wavelet</strong> (<a class="reference internal" href="#tfwavelets.dwtcoeffs.Wavelet" title="tfwavelets.dwtcoeffs.Wavelet"><em>tfwavelets.dwtcoeffs.Wavelet</em></a>) – Wavelet object.</p></li>
+<li><p><strong>levels</strong> (<em>int</em>) – Number of levels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output node of IDWT graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.nodes.upsample">
+<code class="descclassname">tfwavelets.nodes.</code><code class="descname">upsample</code><span class="sig-paren">(</span><em>input_node</em>, <em>odd=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/nodes.html#upsample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.nodes.upsample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upsamples. Doubles the length of the input, filling with zeros</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_node</strong> – 3-tensor [batch, spatial dim, channels] to be upsampled</p></li>
+<li><p><strong>odd</strong> – Bool, optional. If True, content of input_node will be
+placed on the odd indeces of the output. Otherwise, the
+content will be places on the even indeces. This is the
+default behaviour.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The upsampled output Tensor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfwavelets.utils">
+<span id="tfwavelets-utils-module"></span><h2>tfwavelets.utils module<a class="headerlink" href="#module-tfwavelets.utils" title="Permalink to this headline">¶</a></h2>
+<p>The ‘utils’ module contains some useful helper functions, mostly used during the
+implementation of the other modules.</p>
+<dl class="function">
+<dt id="tfwavelets.utils.adapt_filter">
+<code class="descclassname">tfwavelets.utils.</code><code class="descname">adapt_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/utils.html#adapt_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.utils.adapt_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expands dimensions of a 1d vector to match the required tensor dimensions in a TF
+graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filter</strong> (<em>np.ndarray</em>) – A 1D vector containing filter coefficients</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3D vector with two empty dimensions as dim 2 and 3.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.utils.to_tf_mat">
+<code class="descclassname">tfwavelets.utils.</code><code class="descname">to_tf_mat</code><span class="sig-paren">(</span><em>matrices</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/utils.html#to_tf_mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.utils.to_tf_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expands dimensions of 2D matrices to match the required tensor dimensions in a TF
+graph, and wrapping them as TF constants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrices</strong> (<em>iterable</em>) – A list (or tuple) of 2D numpy arrays.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of all the matrices converted to 3D TF tensors.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>iterable</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfwavelets.wrappers">
+<span id="tfwavelets-wrappers-module"></span><h2>tfwavelets.wrappers module<a class="headerlink" href="#module-tfwavelets.wrappers" title="Permalink to this headline">¶</a></h2>
+<p>The ‘wrappers’ module contains methods that wraps around the functionality in nodes. The
+construct a full TF graph, launches a session, and evaluates the graph. Intended to be
+used when you just want to compute the DWT/IDWT of a signal.</p>
+<dl class="function">
+<dt id="tfwavelets.wrappers.dwt1d">
+<code class="descclassname">tfwavelets.wrappers.</code><code class="descname">dwt1d</code><span class="sig-paren">(</span><em>signal</em>, <em>wavelet='haar'</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/wrappers.html#dwt1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.wrappers.dwt1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the DWT of a 1D signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>np.ndarray</em>) – A 1D array to compute DWT of.</p></li>
+<li><p><strong>wavelet</strong> (<em>str</em>) – Type of wavelet (haar or db2)</p></li>
+<li><p><strong>levels</strong> (<em>int</em>) – Number of DWT levels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The DWT of the signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If wavelet is not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.wrappers.dwt2d">
+<code class="descclassname">tfwavelets.wrappers.</code><code class="descname">dwt2d</code><span class="sig-paren">(</span><em>signal</em>, <em>wavelet='haar'</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/wrappers.html#dwt2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.wrappers.dwt2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the DWT of a 2D signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>np.ndarray</em>) – A 2D array to compute DWT of.</p></li>
+<li><p><strong>wavelet</strong> (<em>str</em>) – Type of wavelet (haar or db2)</p></li>
+<li><p><strong>levels</strong> (<em>int</em>) – Number of DWT levels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The DWT of the signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If wavelet is not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.wrappers.idwt1d">
+<code class="descclassname">tfwavelets.wrappers.</code><code class="descname">idwt1d</code><span class="sig-paren">(</span><em>signal</em>, <em>wavelet='haar'</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/wrappers.html#idwt1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.wrappers.idwt1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the inverse DWT of a 1D signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>np.ndarray</em>) – A 1D array to compute IDWT of.</p></li>
+<li><p><strong>wavelet</strong> (<em>str</em>) – Type of wavelet (haar or db2)</p></li>
+<li><p><strong>levels</strong> (<em>int</em>) – Number of DWT levels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The IDWT of the signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If wavelet is not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tfwavelets.wrappers.idwt2d">
+<code class="descclassname">tfwavelets.wrappers.</code><code class="descname">idwt2d</code><span class="sig-paren">(</span><em>signal</em>, <em>wavelet='haar'</em>, <em>levels=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/tfwavelets/wrappers.html#idwt2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfwavelets.wrappers.idwt2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the inverse DWT of a 2D signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>np.ndarray</em>) – A 2D array to compute iDWT of.</p></li>
+<li><p><strong>wavelet</strong> (<em>str</em>) – Type of wavelet (haar or db2)</p></li>
+<li><p><strong>levels</strong> (<em>int</em>) – Number of DWT levels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The IDWT of the signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If wavelet is not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfwavelets">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-tfwavelets" title="Permalink to this headline">¶</a></h2>
+<p>The tfwavelets package offers ways to achieve discrete wavelet transforms in tensorflow.</p>
+<p>The package consists of the following modules:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘nodes’ contains methods to construct TF subgraphs computing the 1D or 2D DWT or
+IDWT. Intended to be used if you need a DWT in your own TF graph.</p></li>
+<li><p>‘wrappers’ contains methods that wraps around the functionality in nodes. The
+construct a full TF graph, launches a session, and evaluates the graph. Intended to
+be used when you just want to compute the DWT/IDWT of a signal.</p></li>
+<li><p>‘dwtcoeffs’ contains predefined wavelets, as well as the classes necessary to
+create more user-defined wavelets.</p></li>
+<li><p>‘utils’ contains some useful helper functions, mostly used during the implementation
+of the other modules.</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to TF-Wavelets’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Kristian Monsen Haug and Mathias Lohne
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
