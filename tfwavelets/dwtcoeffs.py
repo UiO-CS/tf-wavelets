@@ -345,6 +345,6 @@ def get_wavelet(wavelet_name):
         return db3
     elif wname == 'db4':
         return db4
-    else
+    else:
         return None
 
