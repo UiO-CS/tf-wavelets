@@ -326,3 +326,25 @@ db4 = Wavelet(
                     -0.23037781330885523]), 7)
 )
 
+def get_wavelet(wavelet_name):
+    """
+    Get a wavelet based on the wavelets name.
+
+    Args:
+        wavelet_name (str): Name of the wavelet ('haar', 'db1', 'db2', 'db3' or 'db4').
+
+    Returns:
+        A wavelet object. If the wavelet name is not recognized, it returns None.
+    """
+    wname = wavelet_name.lower()
+    if wname == 'db1' or wname == 'haar':
+        return db1
+    elif wname == 'db2':
+        return db2
+    elif wname == 'db3':
+        return db3
+    elif wname == 'db4':
+        return db4
+    else
+        return None
+
