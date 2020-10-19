@@ -23,7 +23,7 @@ def adapt_filter(filter):
     return np.expand_dims(np.expand_dims(filter, -1), -1)
 
 
-def to_tf_mat(matrices):
+def to_tf_mat(matrices, dtype=tf.float32):
     """
     Expands dimensions of 2D matrices to match the required tensor dimensions in a TF
     graph, and wrapping them as TF constants.
@@ -38,7 +38,7 @@ def to_tf_mat(matrices):
 
     for matrix in matrices:
         result.append(
-            tf.constant(np.expand_dims(matrix, 0), dtype=tf.float32)
+            tf.constant(np.expand_dims(matrix, 0), dtype=dtype)
         )
 
     return result
