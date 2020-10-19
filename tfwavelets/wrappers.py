@@ -9,7 +9,7 @@ import tfwavelets as tfw
 import tensorflow as tf
 
 
-def dwt1d(signal, wavelet="haar", levels=1):
+def dwt1d(signal, wavelet="haar", levels=1, npdtype=np.float32):
     """
     Computes the DWT of a 1D signal.
 
@@ -26,7 +26,7 @@ def dwt1d(signal, wavelet="haar", levels=1):
     """
     # Prepare signal for tf. Turn into 32bit floats for GPU computation, and
     # expand dims to make it into a 3d tensor so tf.nn.conv1d is happy
-    signal = signal.astype(np.float32)
+    signal = signal.astype(npdtype)
     signal = np.expand_dims(signal, 0)
     signal = np.expand_dims(signal, -1)
 
@@ -39,7 +39,7 @@ def dwt1d(signal, wavelet="haar", levels=1):
     )
 
 
-def dwt2d(signal, wavelet="haar", levels=1):
+def dwt2d(signal, wavelet="haar", levels=1, npdtype=np.float32):
     """
     Computes the DWT of a 2D signal.
 
@@ -56,7 +56,7 @@ def dwt2d(signal, wavelet="haar", levels=1):
     """
     # Prepare signal for tf. Turn into 32bit floats for GPU computation, and
     # expand dims to make it into a 3d tensor so tf.nn.conv1d is happy
-    signal = signal.astype(np.float32)
+    signal = signal.astype(npdtype)
     signal = np.expand_dims(signal, -1)
 
     # Construct and compute TF graph
@@ -68,7 +68,7 @@ def dwt2d(signal, wavelet="haar", levels=1):
     )
 
 
-def idwt1d(signal, wavelet="haar", levels=1):
+def idwt1d(signal, wavelet="haar", levels=1, npdtype=np.float32):
     """
     Computes the inverse DWT of a 1D signal.
 
@@ -85,7 +85,7 @@ def idwt1d(signal, wavelet="haar", levels=1):
     """
     # Prepare signal for tf. Turn into 32bit floats for GPU computation, and
     # expand dims to make it into a 3d tensor so tf.nn.conv1d is happy
-    signal = signal.astype(np.float32)
+    signal = signal.astype(npdtype)
     signal = np.expand_dims(signal, 0)
     signal = np.expand_dims(signal, -1)
 
@@ -98,7 +98,7 @@ def idwt1d(signal, wavelet="haar", levels=1):
     )
 
 
-def idwt2d(signal, wavelet="haar", levels=1):
+def idwt2d(signal, wavelet="haar", levels=1, npdtype=np.float32):
     """
     Computes the inverse DWT of a 2D signal.
 
@@ -115,7 +115,7 @@ def idwt2d(signal, wavelet="haar", levels=1):
     """
     # Prepare signal for tf. Turn into 32bit floats for GPU computation, and
     # expand dims to make it into a 3d tensor so tf.nn.conv1d is happy
-    signal = signal.astype(np.float32)
+    signal = signal.astype(npdtype)
     signal = np.expand_dims(signal, -1)
 
     # Construct and compute TF graph
@@ -127,7 +127,7 @@ def idwt2d(signal, wavelet="haar", levels=1):
     )
 
 
-def _construct_and_compute_graph(input_signal, node, wavelet_obj, levels):
+def _construct_and_compute_graph(input_signal, node, wavelet_obj, levels, npdtype):
     """
     Constructs a TF graph processing the input signal with given node and evaluates it.
 
@@ -140,8 +140,13 @@ def _construct_and_compute_graph(input_signal, node, wavelet_obj, levels):
     Returns:
 
     """
+    if npdtype == np.float32:
+        dtype=tf.float32;
+    elif npdtype == np.float64:
+        dtype=tf.float64;
+
     # Placeholder for input signal
-    tf_signal = tf.placeholder(dtype=tf.float32, shape=input_signal.shape)
+    tf_signal = tf.placeholder(dtype=dtype, shape=input_signal.shape)
 
     # Set up tf graph
     output = node(tf_signal, wavelet=wavelet_obj, levels=levels)

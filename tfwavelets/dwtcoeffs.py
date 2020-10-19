@@ -35,7 +35,7 @@ class Filter:
     """
 
 
-    def __init__(self, coeffs, zero):
+    def __init__(self, coeffs, zero, dtype=tf.float32):
         """
         Create a filter based on given filter coefficients
 
@@ -44,15 +44,21 @@ class Filter:
             zero (int):                Origin of filter (which index of coeffs array is
                                        actually indexed as 0).
         """
-        self.coeffs = tf.constant(adapt_filter(coeffs), dtype=tf.float32)
+        self.dtype=dtype;
+        if dtype == tf.float32:
+            self.npdtype = np.float32;
+        elif dtype == tf.float64:
+            self.npdtype = np.float64;
+
+        self.coeffs = tf.constant(adapt_filter(coeffs), dtype=self.dtype)
 
         if not isinstance(coeffs, np.ndarray):
             coeffs = np.array(self.coeffs)
-        self._coeffs = coeffs.astype(np.float32)
+        self._coeffs = coeffs.astype(self.npdtype)
 
         self.zero = zero
 
-        self.edge_matrices = to_tf_mat(self._edge_matrices())
+        self.edge_matrices = to_tf_mat(self._edge_matrices(), dtype=self.dtype)
 
 
     def __getitem__(self, item):
@@ -111,7 +117,7 @@ class Filter:
         # from having having columns in common
         padding = max((self.zero, n - self.zero - 1))
         matrix_size = n + padding
-        filter_matrix = np.zeros((matrix_size, matrix_size), dtype=np.float32)
+        filter_matrix = np.zeros((matrix_size, matrix_size), dtype=self.npdtype)
         negative = self._coeffs[
                    -(self.zero + 1):]  # negative indexed filter coeffs (and 0)
         positive = self._coeffs[
@@ -139,8 +145,8 @@ class Filter:
 
         # Indexing wrong when there are no negative indexed coefficients
         if num_neg == 1:
-            bottom_left = np.zeros((0, 0), dtype=np.float32)
-            bottom_right = np.zeros((0, 0), dtype=np.float32)
+            bottom_left = np.zeros((0, 0), dtype=self.npdtype)
+            bottom_right = np.zeros((0, 0), dtype=self.npdtype)
 
         return top_left, top_right, bottom_left, bottom_right
 
@@ -156,7 +162,7 @@ class TrainableFilter(Filter):
     """
 
 
-    def __init__(self, initial_coeffs, zero, name=None):
+    def __init__(self, initial_coeffs, zero, dtype=tf.float32, name=None):
         """
         Create a trainable filter initialized with given filter coefficients
 
@@ -167,13 +173,13 @@ class TrainableFilter(Filter):
             name (str):                     Optional. Name of tf variable created to hold
                                             the filter coeffs.
         """
-        super().__init__(initial_coeffs, zero)
+        super().__init__(initial_coeffs, zero, dtype=dtype)
 
         self.coeffs = tf.Variable(
             initial_value=adapt_filter(initial_coeffs),
             trainable=True,
             name=name,
-            dtype=tf.float32,
+            dtype=dtype,
             constraint=tf.keras.constraints.max_norm(np.sqrt(2), [1, 2])
         )
 
@@ -326,7 +332,7 @@ db4 = Wavelet(
                     -0.23037781330885523]), 7)
 )
 
-def get_wavelet(wavelet_name):
+def get_wavelet(wavelet_name, dtype=tf.float32):
     """
     Get a wavelet based on the wavelets name.
 
@@ -338,12 +344,98 @@ def get_wavelet(wavelet_name):
     """
     wname = wavelet_name.lower()
     if wname == 'db1' or wname == 'haar':
-        return db1
+        # Haar wavelet
+        a = 1/np.sqrt(2);
+        haar = Wavelet(
+                       Filter(np.array([a,  a]), 1, dtype=dtype),
+                       Filter(np.array([-a, a]), 0, dtype=dtype),
+                       Filter(np.array([a,  a]), 0, dtype=dtype),
+                       Filter(np.array([a, -a]), 1, dtype=dtype),
+                        )
+        return haar
     elif wname == 'db2':
+        db2 = Wavelet(
+            Filter(np.array([-0.12940952255092145,
+                             0.22414386804185735,
+                             0.836516303737469,
+                             0.48296291314469025]), 3, dtype=dtype),
+            Filter(np.array([-0.48296291314469025,
+                             0.836516303737469,
+                             -0.22414386804185735,
+                             -0.12940952255092145]), 0, dtype=dtype),
+            Filter(np.array([0.48296291314469025,
+                             0.836516303737469,
+                             0.22414386804185735,
+                             -0.12940952255092145]), 0, dtype=dtype),
+            Filter(np.array([-0.12940952255092145,
+                             -0.22414386804185735,
+                             0.836516303737469,
+                             -0.48296291314469025]), 3, dtype=dtype)
+        )
         return db2
     elif wname == 'db3':
+        db3 = Wavelet(
+            Filter(np.array([0.035226291882100656,
+                            -0.08544127388224149,
+                            -0.13501102001039084,
+                            0.4598775021193313,
+                            0.8068915093133388,
+                            0.3326705529509569]), 5, dtype=dtype),
+            Filter(np.array([-0.3326705529509569,
+                            0.8068915093133388,
+                            -0.4598775021193313,
+                            -0.13501102001039084,
+                            0.08544127388224149,
+                            0.035226291882100656]), 0, dtype=dtype),
+            Filter(np.array([0.3326705529509569,
+                            0.8068915093133388,
+                            0.4598775021193313,
+                            -0.13501102001039084,
+                            -0.08544127388224149,
+                            0.035226291882100656]), 0, dtype=dtype),
+            Filter(np.array([0.035226291882100656,
+                            0.08544127388224149,
+                            -0.13501102001039084,
+                            -0.4598775021193313,
+                            0.8068915093133388,
+                            -0.3326705529509569]), 5, dtype=dtype)
+        )
         return db3
     elif wname == 'db4':
+        db4 = Wavelet(
+            Filter(np.array([-0.010597401784997278,
+                            0.032883011666982945,
+                            0.030841381835986965,
+                            -0.18703481171888114,
+                            -0.02798376941698385,
+                            0.6308807679295904,
+                            0.7148465705525415,
+                            0.23037781330885523]), 7, dtype=dtype),
+            Filter(np.array([-0.23037781330885523,
+                            0.7148465705525415,
+                            -0.6308807679295904,
+                            -0.02798376941698385,
+                            0.18703481171888114,
+                            0.030841381835986965,
+                            -0.032883011666982945,
+                            -0.010597401784997278]), 0, dtype=dtype),
+            Filter(np.array([0.23037781330885523,
+                            0.7148465705525415,
+                            0.6308807679295904,
+                            -0.02798376941698385,
+                            -0.18703481171888114,
+                            0.030841381835986965,
+                            0.032883011666982945,
+                            -0.010597401784997278]), 0, dtype=dtype),
+            Filter(np.array([-0.010597401784997278,
+                            -0.032883011666982945,
+                            0.030841381835986965,
+                            0.18703481171888114,
+                            -0.02798376941698385,
+                            -0.6308807679295904,
+                            0.7148465705525415,
+                            -0.23037781330885523]), 7, dtype=dtype)
+        )
         return db4
     else:
         return None
