@@ -137,8 +137,8 @@ def dwt1d(input_node, wavelet, levels=1):
     last_level = input_node
 
     for level in range(levels):
-        lp_res = cyclic_conv1d_alt(last_level, wavelet.decomp_lp)[:, ::2, :]
-        hp_res = cyclic_conv1d_alt(last_level, wavelet.decomp_hp)[:, 1::2, :]
+        lp_res = cyclic_conv1d(last_level, wavelet.decomp_lp)[:, ::2, :]
+        hp_res = cyclic_conv1d(last_level, wavelet.decomp_hp)[:, 1::2, :]
 
         last_level = lp_res
         coeffs[levels - level] = hp_res
@@ -224,8 +224,8 @@ def idwt1d(input_node, wavelet, levels=1):
         lowres_padded = upsample(last_level, odd=False)
         detail_padded = upsample(detail, odd=True)
 
-        lowres_filtered = cyclic_conv1d_alt(lowres_padded, wavelet.recon_lp)
-        detail_filtered = cyclic_conv1d_alt(detail_padded, wavelet.recon_hp)
+        lowres_filtered = cyclic_conv1d(lowres_padded, wavelet.recon_lp)
+        detail_filtered = cyclic_conv1d(detail_padded, wavelet.recon_hp)
 
         last_level = lowres_filtered + detail_filtered
 
